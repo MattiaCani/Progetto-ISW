@@ -1,13 +1,13 @@
 # Create your views here.
 from django.conf import settings
 
-
 from . import forms
 from django.contrib.auth import login, authenticate, logout
 from django.shortcuts import HttpResponse, redirect
 from django.shortcuts import render
 from utente.forms.auth import LoginForm, SignupForm
 from utente.models import Utente, Amministratore, Carrello, Cliente
+from vetrine.models import VetrinaAmministratore, Vetrina
 import datetime
 
 
@@ -29,7 +29,14 @@ def loginview(request):
             if user is not None:
                 login(request, user)
                 message = f'Ciao {user.username}!'
-                if user.is_superuser or user.is_admin:  # redirect a vetrina diversa a seconda che sia admin o no
+                if not VetrinaAmministratore.objects.count() == 1:
+                    # se non esiste già crea una vetrina amministratore, a prescindere da chi faccia accesso
+                    vetrina = VetrinaAmministratore(
+                        listaProdotti=""
+                    )
+                    vetrina.save()
+
+                if user.is_superuser:  # redirect a vetrina diversa a seconda che sia admin o no
                     if Amministratore.objects.filter(username=user.username).exists():
                         return redirect('vetrinaAmministratore')
                     else:
@@ -61,11 +68,19 @@ def signupview(request):
             user = form.save()
             # auto-login user
             # login(request, user)
-            new_carrello = Carrello(    # si crea un carrello per ogni cliente
-                importoTotale=0.00,
-                listaProdotti=None
+            if not VetrinaAmministratore.objects.count() == 1:
+                # se non esiste già crea una vetrina amministratore, a prescindere da chi si registri
+                vetrina = VetrinaAmministratore(
+                    listaProdotti=""
+                )
+                vetrina.save()
+
+            new_carrello = Carrello(  # si crea un carrello per ogni cliente
+                importoTotale=0.00
             )
+            new_carrello.listaProdotti.set(None)
             new_carrello.save()
+
 
             new_cliente = Cliente(
                 username=form.cleaned_data['username'],
@@ -78,7 +93,15 @@ def signupview(request):
             new_cliente.isAdmin = False
             new_cliente.save()
 
+            if not Vetrina.objects.count() == 1:
+                # se non esiste già una vetrina clienti la crea
+                vetrina_cliente = Vetrina(
+                    listaProdotti=""
+                )
+                if VetrinaAmministratore.objects.count() == 1:
+                    vetrina_amministratore = VetrinaAmministratore.objects.get()
+                    vetrina_cliente.vetrina = vetrina_amministratore
+
+                vetrina_cliente.save()
             return redirect(settings.LOGIN_REDIRECT_URL)
     return render(request, 'registration/signup.html', context={'form': form})
-
-
