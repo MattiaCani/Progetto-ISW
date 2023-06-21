@@ -1,0 +1,15 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <h1>Progetto</h1>
+</head>
+<body>
+
+      {% block content %}{% endblock content %}
+      {% if user.is_authenticated %}
+            <p>Sei loggato come {{ request.user }}. Clicca qui per il <a href="{% url 'logout' %}">log out</a></p>
+        {% endif %}
+</body>
+</html>
+
