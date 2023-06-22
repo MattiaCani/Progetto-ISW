@@ -7,7 +7,7 @@ from django.shortcuts import HttpResponse, redirect
 from django.shortcuts import render
 from utente.forms.auth import LoginForm, SignupForm
 from utente.models import Utente, Amministratore, Carrello, Cliente
-from vetrine.models import VetrinaAmministratore, Vetrina
+from vetrine.models import VetrinaAmministratore, Vetrina,Filtro
 import datetime
 
 
@@ -30,9 +30,9 @@ def loginview(request):
                 login(request, user)
                 message = f'Ciao {user.username}!'
                 if not VetrinaAmministratore.objects.count() == 1:
-                    # se non esiste già crea una vetrina amministratore, a prescindere da chi faccia accesso
+                # se non esiste già crea una vetrina amministratore, a prescindere da chi faccia accesso
                     vetrina = VetrinaAmministratore(
-                        listaProdotti=""
+                        vetrinaidadmin="Vetrina Amministratore",
                     )
                     vetrina.save()
 
@@ -71,16 +71,14 @@ def signupview(request):
             if not VetrinaAmministratore.objects.count() == 1:
                 # se non esiste già crea una vetrina amministratore, a prescindere da chi si registri
                 vetrina = VetrinaAmministratore(
-                    listaProdotti=""
+                    vetrinaidadmin="Vetrina Amministratore",
                 )
                 vetrina.save()
 
             new_carrello = Carrello(  # si crea un carrello per ogni cliente
+                possessore="Carrello",
                 importoTotale=0.00
             )
-            
-            new_carrello.save()
-
 
             new_cliente = Cliente(
                 username=form.cleaned_data['username'],
@@ -91,17 +89,18 @@ def signupview(request):
                 carrello=new_carrello
             )
             new_cliente.isAdmin = False
+            new_carrello.possessore = "Carrello di "+str(new_cliente.username)
+            new_carrello.save()
+            new_cliente.carrello = new_carrello
             new_cliente.save()
 
             if not Vetrina.objects.count() == 1:
-                # se non esiste già una vetrina clienti la crea
-                vetrina_cliente = Vetrina(
-                    listaProdotti=""
+                vetrina_admin = VetrinaAmministratore.objects.get()
+                vetrina_clienti = Vetrina(
+                    vetrinaid="Vetrina Clienti",
+                    vetrina=vetrina_admin
                 )
-                if VetrinaAmministratore.objects.count() == 1:
-                    vetrina_amministratore = VetrinaAmministratore.objects.get()
-                    vetrina_cliente.vetrina = vetrina_amministratore
+                vetrina_clienti.save()
 
-                vetrina_cliente.save()
             return redirect(settings.LOGIN_REDIRECT_URL)
     return render(request, 'registration/signup.html', context={'form': form})

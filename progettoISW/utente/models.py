@@ -3,7 +3,7 @@ from django.db import models
 from django.contrib.auth import logout
 from utente.enums import MetodoPagamento
 from django.contrib.auth.models import AbstractUser
-from vetrine.models import Prodotto
+from vetrine.models import VetrinaAmministratore, Vetrina, ResocontoVendite
 
 
 class UtenteAuth(AbstractUser):
@@ -37,17 +37,37 @@ class Amministratore(Utente):
         return str(self.adminID)
 
 
+class Prodotto(models.Model):
+    pezziVenduti = models.PositiveIntegerField
+    disponibilita = models.PositiveIntegerField(default=100)
+    nome = models.CharField(max_length=30)
+    codiceSeriale = models.IntegerField(unique=True, default=0, primary_key=True)  # unique
+    tipologia = models.CharField(max_length=30)
+    descrizione = models.TextField(default="")
+    quantitaAcquisto = models.PositiveIntegerField(default=1)
+    prezzo = models.FloatField(default=0.0)
+    vetrina = models.ForeignKey(Vetrina, on_delete=models.PROTECT, null=True)
+    vetrinaAmministratore = models.ForeignKey(VetrinaAmministratore, on_delete=models.CASCADE, null=True)
+    resVendite = models.ForeignKey(ResocontoVendite, on_delete=models.PROTECT, null=True)
+    carrelloManyToMany = models.ManyToManyField('utente.Carrello')
+
+
+    def __str__(self):
+        return str(self.codiceSeriale)
+
+
 class Carrello(models.Model):
-    listaProdotti = models.ManyToManyField(Prodotto, null=True)
-    importoTotale = models.FloatField(default=0.00)
+    possessore = models.CharField(max_length=20, primary_key=True)
+    listaProdotti = models.ManyToManyField('utente.Prodotto')
+    importoTotale = models.FloatField(default=0.0)
 
-    def __init__(self, importoTotale=0.00, *args, **kwargs):
+    def __init__(self, possessore, importoTotale=0.0, *args, **kwargs):
         super().__init__(*args, **kwargs)
-
+        self.possessore = possessore
         self.importoTotale = importoTotale
 
     def __str__(self):
-        return self.importoTotale
+        return self.possessore
 
 
 class Cliente(Utente):
@@ -56,6 +76,7 @@ class Cliente(Utente):
 
     def __str__(self):
         return self.username
+
 
 
 class Pagamento(models.Model):

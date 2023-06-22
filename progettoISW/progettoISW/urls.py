@@ -28,6 +28,7 @@ urlpatterns = [
     path('logout/', utente.views.logoutview, name='logout'),
     path('vetrinaCliente/', vetrine.views.vetrina_clienteview, name='vetrinaCliente'),
     path('signup/', utente.views.signupview, name='signup'),
-    path('vetrinaAmministratore/', vetrine.views.vetrina_amministratoreview, name='vetrinaAmministratore')
+    path('vetrinaAmministratore/', vetrine.views.vetrina_amministratoreview, name='vetrinaAmministratore'),
+    path('nuovoProdotto/', vetrine.views.nuovo_prodottoview, name='nuovoProdotto')
 ]
 
