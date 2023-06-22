@@ -27,6 +27,8 @@ class VetrinaAmministratore(models.Model):
         return self.listaProdotti
 
 
+
+
 class Vetrina(models.Model):
     listaProdotti = models.CharField(max_length=2000)
     filtro = models.CharField(max_length=20, choices=Filtro.choices, default=Filtro.NO_FILTRO)

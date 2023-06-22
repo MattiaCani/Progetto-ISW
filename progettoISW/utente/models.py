@@ -41,13 +41,13 @@ class Carrello(models.Model):
     listaProdotti = models.ManyToManyField(Prodotto, null=True)
     importoTotale = models.FloatField(default=0.00)
 
-    def __init__(self, listaProdotti, importoTotale=0.00, *args, **kwargs):
+    def __init__(self, importoTotale=0.00, *args, **kwargs):
         super().__init__(*args, **kwargs)
-        self.listaProdotti = listaProdotti
+
         self.importoTotale = importoTotale
 
     def __str__(self):
-        return self.listaProdotti
+        return self.importoTotale
 
 
 class Cliente(Utente):

@@ -78,7 +78,7 @@ def signupview(request):
             new_carrello = Carrello(  # si crea un carrello per ogni cliente
                 importoTotale=0.00
             )
-            new_carrello.listaProdotti.set(None)
+            
             new_carrello.save()
 
 
