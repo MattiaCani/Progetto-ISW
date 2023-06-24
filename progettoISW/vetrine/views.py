@@ -48,6 +48,25 @@ def vetrina_clienteview(request):
 def vetrina_amministratoreview(request):
     prodotti = Prodotto.objects.all()
 
+    # Applicazione dei filtri
+    tipologia = request.GET.get('tipologia')
+    disponibilita = request.GET.get('disponibilita')
+    prezzo_min = request.GET.get('prezzo_min')
+    prezzo_max = request.GET.get('prezzo_max')
+
+    if tipologia:
+        prodotti = prodotti.filter(tipologia=tipologia)
+    if disponibilita:
+        prodotti = prodotti.filter(disponibilita=disponibilita)
+    if prezzo_min:
+        prodotti = prodotti.filter(prezzo__gte=prezzo_min)
+    if prezzo_max:
+        prodotti = prodotti.filter(prezzo__lte=prezzo_max)
+
+    # Ricerca dei prodotti
+    search_query = request.GET.get('search_query')
+    if search_query:
+        prodotti = prodotti.filter(Q(nome__icontains=search_query) | Q(descrizione__icontains=search_query))
 
     if prodotti.count() == 0:
         message = 'Non hai ancora inserito prodotti'
