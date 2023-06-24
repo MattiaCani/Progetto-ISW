@@ -40,7 +40,8 @@ class Amministratore(Utente):
 class Prodotto(models.Model):
     pezziVenduti = models.PositiveIntegerField
     disponibilita = models.PositiveIntegerField(default=100)
-    nome = models.CharField(max_length=30)
+    # unique necessario per modifica, elimina prodotto
+    nome = models.CharField(max_length=30, unique=True)
     codiceSeriale = models.IntegerField(unique=True, default=0, primary_key=True)  # unique
     tipologia = models.CharField(max_length=30)
     descrizione = models.TextField(default="")
@@ -50,7 +51,6 @@ class Prodotto(models.Model):
     vetrinaAmministratore = models.ForeignKey(VetrinaAmministratore, on_delete=models.CASCADE, null=True)
     resVendite = models.ForeignKey(ResocontoVendite, on_delete=models.PROTECT, null=True)
     carrelloManyToMany = models.ManyToManyField('utente.Carrello')
-
 
     def __str__(self):
         return str(self.codiceSeriale)

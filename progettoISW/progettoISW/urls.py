@@ -29,6 +29,9 @@ urlpatterns = [
     path('vetrinaCliente/', vetrine.views.vetrina_clienteview, name='vetrinaCliente'),
     path('signup/', utente.views.signupview, name='signup'),
     path('vetrinaAmministratore/', vetrine.views.vetrina_amministratoreview, name='vetrinaAmministratore'),
-    path('nuovoProdotto/', vetrine.views.nuovo_prodottoview, name='nuovoProdotto')
+    path('nuovoProdotto/', vetrine.views.nuovo_prodottoview, name='nuovoProdotto'),
+    path('rimuovi_prodotto/<str:nomeprodotto>/', vetrine.views.rimuovi_prodotto_view, name='rimuoviProdotto'),
+    path('modifica_prodotto/<str:nomeprodotto>/', vetrine.views.modifica_prodotto_view, name='modificaProdotto')
 ]
+
 
