@@ -4,25 +4,53 @@ from vetrine.forms.nuovoProdotto import nuovoProdottoForm
 from vetrine.forms.modificaProdotto import modificaProdottoForm
 from vetrine.models import VetrinaAmministratore, Vetrina
 from utente.models import Prodotto
+from django.db.models import Q #classe per effettuare query complesse al DB
 
 # Create your views here.
-
 @login_required
 def vetrina_clienteview(request):
-    return render(request, 'vetrine/vetrinaCliente.html')
+    prodotti = Prodotto.objects.all()
+
+    # Applicazione dei filtri
+    tipologia = request.GET.get('tipologia')
+    disponibilita = request.GET.get('disponibilita')
+    prezzo_min = request.GET.get('prezzo_min')
+    prezzo_max = request.GET.get('prezzo_max')
+
+    if tipologia:
+        prodotti = prodotti.filter(tipologia=tipologia)
+    if disponibilita:
+        prodotti = prodotti.filter(disponibilita=disponibilita)
+    if prezzo_min:
+        prodotti = prodotti.filter(prezzo__gte=prezzo_min) #maggiore o uguale
+    if prezzo_max:
+        prodotti = prodotti.filter(prezzo__lte=prezzo_max) #minore o uguale
+
+    # Ricerca dei prodotti
+    search_query = request.GET.get('search_query')
+    if search_query:
+        prodotti = prodotti.filter(Q(nome__icontains=search_query) | Q(descrizione__icontains=search_query))
+
+    # Azzeramento filtri
+    reset_filters = request.GET.get('reset_filters')
+    if reset_filters:
+        prodotti = Prodotto.objects.all()
+
+    if prodotti.count() == 0:
+        message = 'Nessun prodotto attualmente in vendita :('
+
+    return render(request, 'vetrine/vetrinaCliente.html', {'prodotti': prodotti})
+
+
 
 @login_required
 @user_passes_test(lambda u: u.is_superuser)
 def vetrina_amministratoreview(request):
-    prodotti = Prodotto.objects.all()  # Recupera tutti i prodotti presenti nel database
-    if Prodotto.objects.count() == 0:
-        message = 'Non hai ancora inserito prodotti'
-    else:
-        vetrina = VetrinaAmministratore.objects.first()
-        ultimo_prodotto = prodotti.last()
-        vetrina.listaProdotti += ultimo_prodotto.nome+", "
-        vetrina.save()
+    prodotti = Prodotto.objects.all()
 
+
+    if prodotti.count() == 0:
+        message = 'Non hai ancora inserito prodotti'
 
     return render(request, 'vetrine/vetrinaAmministratore.html', {'prodotti': prodotti})
 

@@ -5,36 +5,65 @@
     <title>Vetrina Amministratore</title>
 </head>
 <body>
-{% extends 'base.html' %}
-{% block content %}
-<h2>Vetrina amministratore</h2>
-  <table>
-  <tr>
-    <td>Nome prodotto</td>
-    <td>Tipologia</td>
-    <td>Descrizione</td>
-    <td>Prezzo</td>
-    <td>Quantità disponibile</td>
-    <td>Azione</td>
-  </tr>
-</table>
-{% for prodotto in prodotti %}
-    <tr>
-        <td>{{ prodotto.nome }}</td>
-        <td>{{ prodotto.tipologia }}</td>
-        <td>{{ prodotto.descrizione }}</td>
-        <td>{{ prodotto.prezzo }}</td>
-        <td>{{ prodotto.disponibilita }}</td>
-        <td><a href="{% url 'rimuoviProdotto' prodotto.nome|stringformat:'s' %}">Rimuovi prodotto</a></td>
-        <td><a href="{% url 'modificaProdotto' prodotto.nome|stringformat:'s' %}">Modifica prodotto</a></td>
-    </tr><br>
-{% endfor %}
-<form action="{% url 'nuovoProdotto' %}" method="post">
-    {% csrf_token %}
+    {% extends 'base.html' %}
+    {% block content %}
+    <h2>Vetrina amministratore</h2>
 
-    <button type="submit" class="btn btn-primary">Inserisci Prodotto</button>
-</form>
+    <!-- Form per i filtri della vetrina -->
+    <form method="GET">
+        <input type="text" name="tipologia" placeholder="Filtro per tipologia" value="{{ request.GET.tipologia }}">
+        <input type="number" name="disponibilita" placeholder="Filtro per disponibilità" value="{{ request.GET.disponibilita }}">
+        <input type="number" name="prezzo_min" placeholder="Prezzo minimo" value="{{ request.GET.prezzo_min }}">
+        <input type="number" name="prezzo_max" placeholder="Prezzo massimo" value="{{ request.GET.prezzo_max }}">
+        <button type="submit">Filtra</button>
+        <a href="?reset_filters=true">Azzeramento filtri</a>
+    </form>
 
-{% endblock content %}
+    <form method="GET">
+        <input type="text" name="search_query" placeholder="Cerca prodotti" value="{{ request.GET.search_query }}">
+        <button type="submit">Cerca</button>
+    </form>
+
+    <table>
+        <tr>
+            <td>Nome prodotto</td>
+            <td>Tipologia</td>
+            <td>Descrizione</td>
+            <td>Prezzo</td>
+            <td>Quantità disponibile</td>
+            <td>Azione</td>
+        </tr>
+
+        {% for prodotto in prodotti %}
+            {% if request.GET.tipologia and prodotto.tipologia != request.GET.tipologia %}
+                {% comment %} Ignora questa iterazione del ciclo {% endcomment %}
+            {% elif request.GET.disponibilita and prodotto.disponibilita != request.GET.disponibilita %}
+                {% comment %} Ignora questa iterazione del ciclo {% endcomment %}
+            {% elif request.GET.prezzo_min and prodotto.prezzo < request.GET.prezzo_min %}
+                {% comment %} Ignora questa iterazione del ciclo {% endcomment %}
+            {% elif request.GET.prezzo_max and prodotto.prezzo > request.GET.prezzo_max %}
+                {% comment %} Ignora questa iterazione del ciclo {% endcomment %}
+            {% else %}
+                <tr>
+                    <td>{{ prodotto.nome }}</td>
+                    <td>{{ prodotto.tipologia }}</td>
+                    <td>{{ prodotto.descrizione }}</td>
+                    <td>{{ prodotto.prezzo }}</td>
+                    <td>{{ prodotto.disponibilita }}</td>
+                    <td>
+                        <a href="{% url 'rimuoviProdotto' prodotto.nome|stringformat:'s' %}">Rimuovi prodotto</a>
+                        <a href="{% url 'modificaProdotto' prodotto.nome|stringformat:'s' %}">Modifica prodotto</a>
+                    </td>
+                </tr>
+            {% endif %}
+        {% endfor %}
+    </table>
+
+    <form action="{% url 'nuovoProdotto' %}" method="post">
+        {% csrf_token %}
+        <button type="submit" class="btn btn-primary">Inserisci Prodotto</button>
+    </form>
+
+    {% endblock content %}
 </body>
 </html>
