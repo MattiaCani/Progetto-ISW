@@ -1,8 +1,4 @@
 from django.db import models
-from utente.enums import Filtro
-import json
-
-# Create your models here.
 
 
 class ResocontoVendite(models.Model):
@@ -16,27 +12,28 @@ class ResocontoVendite(models.Model):
         return self.totaleVendite
 
 
-class VetrinaAmministratore(models.Model):
-    vetrinaidadmin = models.CharField(max_length=30, default="", primary_key=True)
-    listaProdotti = models.CharField(max_length=2000)
-
-    def __str__(self):
-        return self.vetrinaidadmin
-
-
 class Vetrina(models.Model):
-    vetrinaid = models.CharField(max_length=30, default="", primary_key=True)
-    listaProdotti = models.CharField(max_length=2000, default="")
-    filtro = models.CharField(max_length=20, choices=Filtro.choices, default=Filtro.NO_FILTRO)
-    vetrina = models.OneToOneField(VetrinaAmministratore, on_delete=models.CASCADE, null=True)
+    ID_vetrina = models.CharField(max_length=30, default="Vetrina", primary_key=True)
+
+    def save(self, *args, **kwargs):
+        is_new_instance = self._state.adding
+        super().save(*args, **kwargs)
+        if is_new_instance:
+            VetrinaAmministratore.objects.create(vetrina=self)
 
     def __str__(self):
-        return self.vetrinaid
+        return self.ID_vetrina
 
-    def set_listaprodotti(self, prodlist):
-        self.listaProdotti = json.dumps(prodlist)
-
-    def get_listaprodotti(self):
-        return json.loads(self.listaProdotti)
+    class Meta:
+        verbose_name_plural = "Vetrine"
 
 
+class VetrinaAmministratore(models.Model):
+    vetrina = models.OneToOneField(Vetrina, on_delete=models.CASCADE, null=True)
+    ID_vetrina_admin = models.CharField(max_length=30, default="Vetrina Amministratore", primary_key=True)
+
+    def __str__(self):
+        return self.ID_vetrina_admin
+
+    class Meta:
+        verbose_name_plural = "Vetrine Amministratore"

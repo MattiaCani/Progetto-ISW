@@ -1,22 +1,23 @@
-
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <title>Modifica Prodotto</title>
 </head>
+
 <body>
-{% extends 'base.html' %}
-{% block content %}
-    <h2>Nuovo prodotto</h2>
-    {% if form.errors %}
-        {{ form.errors }}
-    {% endif %}
-    <form method="post">
-        {{ form.as_p }}
-        {% csrf_token %}
-        <button type="submit" >Salva</button>
-    </form>
-{% endblock content %}
+    <h1>Modifica prodotto</h1>
+    {% extends 'base.html' %}
+    {% block content %}
+        {% if form.errors %}
+            {{ form.errors }}
+        {% endif %}
+        <form method="post">
+            {{ form.as_p }}
+            {% csrf_token %}
+            <button type="submit" >Submit</button>
+        </form>
+    {% endblock content %}
 </body>
 </html>

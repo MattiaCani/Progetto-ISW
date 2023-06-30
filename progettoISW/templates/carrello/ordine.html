@@ -3,20 +3,18 @@
 
 <head>
     <meta charset="UTF-8">
-    <title>Aggiungi Prodotto</title>
+    <title>Ordine</title>
 </head>
 
 <body>
-    <h1>Nuovo prodotto</h1>
+    <h1>Ordine</h1>
     {% extends 'base.html' %}
     {% block content %}
-        {% if form.errors %}
-            {{ form.errors }}
-        {% endif %}
         <form method="post">
-            {{ form.as_p }}
             {% csrf_token %}
-            <button type="submit" >Submit</button>
+            {{ form_indirizzo.as_p }}
+            {{ form_pagamento.as_p }}
+            <input type="submit" value="Ordina">
         </form>
     {% endblock content %}
 </body>

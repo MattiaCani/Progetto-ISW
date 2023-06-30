@@ -52,7 +52,7 @@ MIDDLEWARE = [
 ROOT_URLCONF = 'progettoISW.urls'
 
 SETTINGS_PATH = os.path.dirname(os.path.dirname(__file__))
-AUTH_USER_MODEL = 'utente.UtenteAuth'
+AUTH_USER_MODEL = 'utente.Utente'
 
 TEMPLATES = [
     {

@@ -1,125 +1,90 @@
-# Create your models here.
 from django.db import models
-from django.contrib.auth import logout
 from utente.enums import MetodoPagamento
 from django.contrib.auth.models import AbstractUser
 from vetrine.models import VetrinaAmministratore, Vetrina, ResocontoVendite
 
 
-class UtenteAuth(AbstractUser):
-    nome = models.CharField(max_length=30, default="")
-    cognome = models.CharField(max_length=30, default="")
-    email = models.EmailField(max_length=30, unique=True, default="default@default.com")
-    password = models.CharField(max_length=30, unique=True, default="password")
-    isAdmin = models.BooleanField
-    # problema: django di default fa funzionare il login con username e password, non con l'email,
-    # modificarlo è un casino
+class Utente(AbstractUser):
+    email = models.EmailField(max_length=30, unique=True)
 
-
-# non si può usare questa come modello per gli utenti da usare perchè ha abstract=true, che serve per
-# farla ereditare a cliente e amministratore
-class Utente(models.Model):
-    username = models.CharField(max_length=30, default="")
-    nome = models.CharField(max_length=30, default="")
-    cognome = models.CharField(max_length=30, default="")
-    email = models.EmailField(max_length=30, unique=True, default="default@default.com")
-    password = models.CharField(max_length=30, unique=True, default="password")
-    isAdmin = models.BooleanField
+    def save(self, *args, **kwargs):
+        is_new_instance = self._state.adding
+        super().save(*args, **kwargs)
+        if is_new_instance and not self.is_superuser:
+            Carrello.objects.create(possessore=self)
 
     class Meta:
-        abstract = True
-
-
-class Amministratore(Utente):
-    adminID = models.PositiveIntegerField()
-
-    def __str__(self):
-        return str(self.adminID)
+        verbose_name_plural = "Utenti"
 
 
 class Prodotto(models.Model):
-    pezziVenduti = models.PositiveIntegerField
+    pezzi_venduti = models.PositiveIntegerField(default=0)
     disponibilita = models.PositiveIntegerField(default=100)
-    # unique necessario per modifica, elimina prodotto
+
     nome = models.CharField(max_length=30, unique=True)
-    codiceSeriale = models.IntegerField(unique=True, default=0, primary_key=True)  # unique
+    codice_seriale = models.IntegerField(unique=True, default=0, primary_key=True)
     tipologia = models.CharField(max_length=30)
     descrizione = models.TextField(default="")
-    quantitaAcquisto = models.PositiveIntegerField(default=1)
     prezzo = models.FloatField(default=0.0)
-    vetrina = models.ForeignKey(Vetrina, on_delete=models.PROTECT, null=True)
-    vetrinaAmministratore = models.ForeignKey(VetrinaAmministratore, on_delete=models.CASCADE, null=True)
+
+    vetrina = models.ForeignKey(Vetrina, on_delete=models.PROTECT, null=True, default="Vetrina")
     resVendite = models.ForeignKey(ResocontoVendite, on_delete=models.PROTECT, null=True)
-    carrelloManyToMany = models.ManyToManyField('utente.Carrello')
 
     def __str__(self):
-        return str(self.codiceSeriale)
+        return str(self.codice_seriale)
+
+    class Meta:
+        verbose_name_plural = "Prodotti"
+
+
+class ProdottoCarrello(models.Model):
+    utente = models.ForeignKey(Utente, on_delete=models.CASCADE, null=True)
+    prodotto = models.ForeignKey(Prodotto, on_delete=models.CASCADE, null=True)
+    quantita_acquisto = models.IntegerField(default=1)
+
+    def __str__(self):
+        return str(self.prodotto)
 
 
 class Carrello(models.Model):
-    possessore = models.CharField(max_length=20, primary_key=True)
-    listaProdotti = models.ManyToManyField('utente.Prodotto')
-    importoTotale = models.FloatField(default=0.0)
-
-    def __init__(self, possessore, importoTotale=0.0, *args, **kwargs):
-        super().__init__(*args, **kwargs)
-        self.possessore = possessore
-        self.importoTotale = importoTotale
+    possessore = models.OneToOneField(Utente, on_delete=models.CASCADE, null=True)
+    lista_prodotti = models.ManyToManyField('utente.ProdottoCarrello')
+    importo_totale = models.FloatField(default=0.0)
 
     def __str__(self):
-        return self.possessore
+        return self.possessore.username
 
-
-class Cliente(Utente):
-    carrello = models.OneToOneField(Carrello, on_delete=models.CASCADE, null=True)
-    # se il carrello viene eliminato il cliente dovrebbe restare? Ha senso un cliente senza carrello?
-
-    def __str__(self):
-        return self.username
-
+    class Meta:
+        verbose_name_plural = "Carrelli"
 
 
 class Pagamento(models.Model):
-    numerocarta = models.PositiveBigIntegerField(default=1)
+    numero_carta = models.PositiveBigIntegerField(default=1)
     intestatario = models.CharField(max_length=50, default="")
-    nomemetodo = models.CharField(max_length=20, choices=MetodoPagamento.choices, default=MetodoPagamento.CREDITO)
-
-    def __init__(self, numerocarta, intestatario, nomemetodo, *args, **kwargs):
-        super().__init__(*args, **kwargs)
-        self.numerocarta = numerocarta
-        self.intestatario = intestatario
-        self.nomemetodo = nomemetodo
+    nome_metodo = models.CharField(max_length=20, choices=MetodoPagamento.choices, default=MetodoPagamento.CREDITO)
 
     def __str__(self):
-        return self.numerocarta
+        return self.numero_carta
+
+    class Meta:
+        verbose_name_plural = "Pagamenti"
 
 
 class Ordine(models.Model):
-    IDcliente = models.ForeignKey(Cliente, on_delete=models.CASCADE, null=True)
+    cliente = models.ForeignKey(Utente, on_delete=models.CASCADE, null=True)
     carrello = models.OneToOneField(Carrello, on_delete=models.CASCADE, null=True)
-    emailCliente = models.EmailField(max_length=30)
-    nomeCliente = models.CharField(max_length=30)
-    numeroOrdine = models.PositiveIntegerField(unique=True)
-    dataOrdine = models.DateTimeField
-    indirizzoSpedizione = models.CharField(max_length=50)
-    infoPagamento = Pagamento(numerocarta=models.BigIntegerField,
-                              intestatario=models.CharField(max_length=50),
-                              nomemetodo=models.CharField(max_length=20, choices=MetodoPagamento.choices,
-                                                          default=MetodoPagamento.CREDITO))
-
-    def __init__(self, IDcliente=None, carrello=None, emailCliente='', nomeCliente='', numeroOrdine=None,
-                 dataOrdine=None, indirizzoSpedizione='', infoPagamento=None, *args, **kwargs):
-        super(Ordine, self).__init__(*args, **kwargs)
-        self.IDcliente = IDcliente
-        self.carrello = carrello
-        self.emailCliente = emailCliente
-        self.nomeCliente = nomeCliente
-        self.numeroOrdine = numeroOrdine
-        self.dataOrdine = dataOrdine
-        self.indirizzoSpedizione = indirizzoSpedizione
-        self.infoPagamento = infoPagamento
+    email_cliente = models.EmailField(max_length=30)
+    nome_cliente = models.CharField(max_length=30)
+    numero_ordine = models.PositiveIntegerField(unique=True, primary_key=True)
+    data_ordine = models.DateTimeField
+    indirizzo_spedizione = models.CharField(max_length=50)
+    info_pagamento = Pagamento(numero_carta=models.BigIntegerField,
+                               intestatario=models.CharField(max_length=50),
+                               nome_metodo=models.CharField(max_length=20, choices=MetodoPagamento.choices,
+                                                           default=MetodoPagamento.CREDITO))
 
     def __str__(self):
-        return self.numeroOrdine
+        return str(self.numero_ordine)
 
-
+    class Meta:
+        verbose_name_plural = "Ordini"

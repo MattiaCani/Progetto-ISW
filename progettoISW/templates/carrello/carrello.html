@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <title>Carrello</title>
+</head>
+
+<body>
+    <script>
+        function onChange(event) {
+            console.log(event.target.value)
+        }
+    </script>
+    <h1>Carrello</h1>
+    {% extends 'base.html' %}
+    {% block content %}
+      <table id="prodotti_carrello">
+        <thead>
+            <tr>
+                <td>Nome prodotto</td>
+                <td>Tipologia</td>
+                <td>Quantità</td>
+                <td>Azione</td>
+                <td>Prezzo</td>
+            </tr>
+        </thead>
+
+        <tbody>
+            {% for item in carrello.lista_prodotti.all %}
+                <form id="{{ item.prodotto.codice_seriale }}" method="post">
+                    {% csrf_token %}
+                    <tr id="{{ item.prodotto.codice_seriale }}">
+                        <td>{{ item.prodotto.nome }}</td>
+                        <td>{{ item.prodotto.tipologia }}</td>
+                        <td>
+                            <label for="quantita_acquisto" onchange="onChange()">
+                                <input type="number" id="quantita_acquisto" min="1" max="10" value="1"/>
+                            </label>
+                        </td>
+                        <td>
+                            <a href="{% url 'rimuovi_dal_carrello' item.prodotto.codice_seriale %}">Rimuovi</a>
+                        </td>
+                        <td>{{ item.prodotto.prezzo }}€</td>
+                    </tr>
+                </form>
+            {% endfor %}
+            <tr id="totale">
+                <td colspan="4">Totale</td>
+                <td>{{ carrello.importo_totale }}€</td>
+            </tr>
+            <tr id="checkout">
+                <td colspan="4"></td>
+                <td><a href="{% url 'ordine' %}">Checkout</a></td>
+            </tr>
+        </tbody>
+      </table>
+  {% endblock content %}
+</body>
+</html>

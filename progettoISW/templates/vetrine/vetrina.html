@@ -2,16 +2,21 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>Vetrina Amministratore</title>
+    <title>Vetrina</title>
 </head>
 
 <body>
-    <h1>Amministrazione shop</h1>
-    {% extends 'base.html' %}
-    {% block content %}
+    <script>
+        function onChange(event) {
+            console.log(event.target.value)
+        }
+    </script>
+    <h1>Visiona il nostro shop!</h1>
+      {% extends 'base.html' %}
+      {% block content %}
 
-    <!-- Filtri della vetrina -->
-    <form method="GET">
+      <!-- Filtri della vetrina -->
+      <form method="GET">
         <select name="tipologia">
             <option value="" selected>Tutte le tipologie</option>
             {% for item in elenco_tipologie %}
@@ -25,21 +30,21 @@
         <a href="?reset_filters=true">Azzeramento filtri</a>
       </form>
 
-    <form method="GET">
-        <input type="text" name="search_query" placeholder="Cerca prodotti" value="{{ request.GET.search_query }}">
-        <button type="submit">Cerca</button>
-    </form>
+      <form method="GET">
+          <input type="text" name="search_query" placeholder="Cerca prodotti" value="{{ request.GET.search_query }}">
+          <button type="submit">Cerca</button>
+      </form>
 
-    {% if elenco_prodotti.count == 0 %}{{ error_message }}{% endif %}
+      {% if elenco_prodotti.count == 0 %}{{ error_message }}{% endif %}
 
-        <table>
+          <table>
               <thead>
                  <tr>
                   <td>Nome prodotto</td>
                   <td>Tipologia</td>
                   <td>Descrizione</td>
                   <td>Prezzo</td>
-                  <td>Disponibilità</td>
+                  <td>Quantità</td>
                   <td>Azione</td>
                 </tr>
               </thead>
@@ -50,21 +55,20 @@
                       <td>{{ item.nome }}</td>
                       <td>{{ item.tipologia }}</td>
                       <td>{{ item.descrizione }}</td>
-                      <td>{{ item.prezzo }}</td>
-                      <td>{{ item.disponibilita }}</td>
+                      <td>{{ item.prezzo }}€</td>
+                        <td>
+                            <label for="quantita_acquisto" onchange="onChange()">
+                                <input type="number" id="quantita_acquisto" min="1" max="10" value="1"/>
+                            </label>
+                        </td>
                       <td>
-                          <a href="{% url 'rimuovi_prodotto' item.codice_seriale %}">Rimuovi prodotto</a>
-                          <a href="{% url 'modifica_prodotto' item.codice_seriale %}">Modifica prodotto</a>
+                          <a href="{% url 'aggiungi_al_carrello' item.codice_seriale item.disponibilita %}">Aggiungi al carrello</a>
                       </td>
                     </tr>
                 {% endfor %}
               </tbody>
           </table>
-            <form action="{% url 'nuovo_prodotto' %}" method="post">
-                {% csrf_token %}
-                <button type="submit">Inserisci Prodotto</button>
-            </form>
-    {% endblock content %}
+          <a href="{% url 'carrello' %}">Apri carrello</a>
+      {% endblock content %}
 </body>
 </html>
-

@@ -1,15 +1,15 @@
 from django.contrib.auth.decorators import login_required, user_passes_test
-from django.shortcuts import render, redirect
-from vetrine.forms.nuovoProdotto import nuovoProdottoForm
-from vetrine.forms.modificaProdotto import modificaProdottoForm
+from django.shortcuts import render, redirect, get_object_or_404
+from vetrine.forms.forms_prodotti import NuovoProdottoForm, ModificaProdottoForm
 from vetrine.models import VetrinaAmministratore, Vetrina
 from utente.models import Prodotto
-from django.db.models import Q #classe per effettuare query complesse al DB
+from django.db.models import Q  # classe per effettuare query complesse al DB
 
-# Create your views here.
-@login_required
-def vetrina_clienteview(request):
-    prodotti = Prodotto.objects.all()
+
+def carica_vetrina(request, tipo_vetrina):
+    elenco_prodotti = tipo_vetrina.prodotto_set.all()
+    elenco_tipologie = elenco_prodotti.values('tipologia').distinct()
+    message = 'Nessun prodotto attualmente in vendita :('
 
     # Applicazione dei filtri
     tipologia = request.GET.get('tipologia')
@@ -18,140 +18,94 @@ def vetrina_clienteview(request):
     prezzo_max = request.GET.get('prezzo_max')
 
     if tipologia:
-        prodotti = prodotti.filter(tipologia=tipologia)
+        elenco_prodotti = elenco_prodotti.filter(tipologia=tipologia)
     if disponibilita:
-        prodotti = prodotti.filter(disponibilita=disponibilita)
+        elenco_prodotti = elenco_prodotti.filter(disponibilita__=disponibilita)
     if prezzo_min:
-        prodotti = prodotti.filter(prezzo__gte=prezzo_min) #maggiore o uguale
+        elenco_prodotti = elenco_prodotti.filter(prezzo__gte=prezzo_min)  # maggiore o uguale
     if prezzo_max:
-        prodotti = prodotti.filter(prezzo__lte=prezzo_max) #minore o uguale
+        elenco_prodotti = elenco_prodotti.filter(prezzo__lte=prezzo_max)  # minore o uguale
 
     # Ricerca dei prodotti
     search_query = request.GET.get('search_query')
     if search_query:
-        prodotti = prodotti.filter(Q(nome__icontains=search_query) | Q(descrizione__icontains=search_query))
+        elenco_prodotti = elenco_prodotti.filter(
+            Q(nome__icontains=search_query) | Q(descrizione__icontains=search_query))
 
     # Azzeramento filtri
     reset_filters = request.GET.get('reset_filters')
     if reset_filters:
-        prodotti = Prodotto.objects.all()
+        elenco_prodotti = get_object_or_404(Vetrina).prodotto_set.all()
 
-    if prodotti.count() == 0:
-        message = 'Nessun prodotto attualmente in vendita :('
+    context = {
+        'elenco_prodotti': elenco_prodotti,
+        'elenco_tipologie': elenco_tipologie,
+        'tipologia_filtrata': tipologia,
+        'error_message': message
+    }
 
-    return render(request, 'vetrine/vetrinaCliente.html', {'prodotti': prodotti})
+    return context
 
+
+@login_required
+@user_passes_test(lambda u: not u.is_superuser)
+def vetrina_cliente_view(request):
+    context = carica_vetrina(request, get_object_or_404(Vetrina))
+    return render(request, "vetrine/vetrina.html", context=context)
 
 
 @login_required
 @user_passes_test(lambda u: u.is_superuser)
-def vetrina_amministratoreview(request):
-    prodotti = Prodotto.objects.all()
-
-    # Applicazione dei filtri
-    tipologia = request.GET.get('tipologia')
-    disponibilita = request.GET.get('disponibilita')
-    prezzo_min = request.GET.get('prezzo_min')
-    prezzo_max = request.GET.get('prezzo_max')
-
-    if tipologia:
-        prodotti = prodotti.filter(tipologia=tipologia)
-    if disponibilita:
-        prodotti = prodotti.filter(disponibilita=disponibilita)
-    if prezzo_min:
-        prodotti = prodotti.filter(prezzo__gte=prezzo_min)
-    if prezzo_max:
-        prodotti = prodotti.filter(prezzo__lte=prezzo_max)
-
-    # Ricerca dei prodotti
-    search_query = request.GET.get('search_query')
-    if search_query:
-        prodotti = prodotti.filter(Q(nome__icontains=search_query) | Q(descrizione__icontains=search_query))
-
-    if prodotti.count() == 0:
-        message = 'Non hai ancora inserito prodotti'
-
-    return render(request, 'vetrine/vetrinaAmministratore.html', {'prodotti': prodotti})
+def vetrina_amministratore_view(request):
+    context = carica_vetrina(request, get_object_or_404(VetrinaAmministratore).vetrina)
+    return render(request, "vetrine/vetrinaAmministratore.html", context=context)
 
 
 @login_required
 @user_passes_test(lambda u: u.is_superuser)
-def nuovo_prodottoview(request):
+def nuovo_prodotto_view(request):
     if request.method == 'POST':
-        form = nuovoProdottoForm(request.POST)
+        form = NuovoProdottoForm(request.POST)
+
         if form.is_valid():
-            nome = form.cleaned_data['nome']
-            codiceSeriale = form.cleaned_data['codiceSeriale']
-            tipologia = form.cleaned_data['tipologia']
-            descrizione = form.cleaned_data['descrizione']
-            disponibilita = form.cleaned_data['disponibilita']
-            prezzo = form.cleaned_data['prezzo']
+            form.save()
 
-
-            # Creazione del nuovo prodotto
-            nuovo_prodotto = Prodotto.objects.create(
-                nome=nome,
-                codiceSeriale=codiceSeriale,
-                tipologia=tipologia,
-                descrizione=descrizione,
-                disponibilita=disponibilita,
-                prezzo=prezzo
-            )
-            vetrina_amministratore = VetrinaAmministratore.objects.get(vetrinaidadmin="Vetrina Amministratore")
-
-            vetrina_cliente = Vetrina.objects.get_or_create(
-                vetrinaid="Vetrina Clienti",
-                vetrina=vetrina_amministratore)
-            vetrina_cliente = Vetrina.objects.get(vetrinaid="Vetrina Clienti")
-            nuovo_prodotto.vetrina = vetrina_cliente
-            nuovo_prodotto.vetrinaAmministratore = vetrina_amministratore
-            nuovo_prodotto.save()
-
-
-
-            return redirect(
-                'vetrinaAmministratore')  # Redireziona alla vista della vetrina amministratore dopo l'inserimento del prodotto
+            return redirect('vetrinaAmministratore')
 
     else:
-        form = nuovoProdottoForm()
+        form = NuovoProdottoForm()
 
     return render(request, 'prodotti/aggiungiProdotto.html', {'form': form})
 
 
 @login_required
 @user_passes_test(lambda u: u.is_superuser)
-def rimuovi_prodotto_view(request, nomeprodotto):
-    prodotto = Prodotto.objects.get(nome=nomeprodotto)
-    prodotto.delete()
-    message = 'Prodotto eliminato'
+def rimuovi_prodotto_view(request, codice_seriale):
+    get_object_or_404(Prodotto, codice_seriale=codice_seriale).delete()
     return redirect('vetrinaAmministratore')
 
 
 @login_required
 @user_passes_test(lambda u: u.is_superuser)
-def modifica_prodotto_view(request, nomeprodotto):
-    prodotto = Prodotto.objects.get(nome=nomeprodotto)
+def modifica_prodotto_view(request, codice_seriale):
+    prodotto = get_object_or_404(Prodotto, codice_seriale=codice_seriale)
 
     if request.method == 'POST':
         # Ottenere i dati dal form di modifica e applicare le modifiche al prodotto
-        form = modificaProdottoForm(request.POST)
+        form = ModificaProdottoForm(request.POST, instance=prodotto)
+
         if form.is_valid():
-            prodotto.nome = form.cleaned_data['nome']
-            prodotto.codiceSeriale = form.cleaned_data['codiceSeriale']
-            prodotto.tipologia = form.cleaned_data['tipologia']
-            prodotto.descrizione = form.cleaned_data['descrizione']
-            prodotto.prezzo = form.cleaned_data['prezzo']
-            prodotto.disponibilita = form.cleaned_data['disponibilita']
-            prodotto.save()
+            form.save()
+
             return redirect('vetrinaAmministratore')
+
     else:
-        form = modificaProdottoForm(initial={
+        form = ModificaProdottoForm(initial={
             'nome': prodotto.nome,
             'tipologia': prodotto.tipologia,
-            'codiceSeriale': prodotto.codiceSeriale,
             'descrizione': prodotto.descrizione,
             'prezzo': prodotto.prezzo,
             'disponibilita': prodotto.disponibilita,
-        })
+        }, instance=prodotto)
 
     return render(request, 'prodotti/modificaProdotto.html', {'form': form})
