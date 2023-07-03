@@ -7,11 +7,6 @@
 </head>
 
 <body>
-    <script>
-        function onChange(event) {
-            console.log(event.target.value)
-        }
-    </script>
     <h1>Carrello</h1>
     {% extends 'base.html' %}
     {% block content %}
@@ -28,14 +23,14 @@
 
         <tbody>
             {% for item in carrello.lista_prodotti.all %}
-                <form id="{{ item.prodotto.codice_seriale }}" method="post">
+                <form action="{%  url 'update_quantita' item.prodotto.codice_seriale %}" method="POST">
                     {% csrf_token %}
                     <tr id="{{ item.prodotto.codice_seriale }}">
                         <td>{{ item.prodotto.nome }}</td>
                         <td>{{ item.prodotto.tipologia }}</td>
                         <td>
-                            <label for="quantita_acquisto" onchange="onChange()">
-                                <input type="number" id="quantita_acquisto" min="1" max="10" value="1"/>
+                            <label for="quantita_acquisto">
+                                {{ form_quantita.as_div }}
                             </label>
                         </td>
                         <td>

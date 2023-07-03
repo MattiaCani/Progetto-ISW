@@ -48,7 +48,7 @@ class ProdottoCarrello(models.Model):
 
 class Carrello(models.Model):
     possessore = models.OneToOneField(Utente, on_delete=models.CASCADE, null=True)
-    lista_prodotti = models.ManyToManyField('utente.ProdottoCarrello')
+    lista_prodotti = models.ManyToManyField('utente.ProdottoCarrello', blank=True)
     importo_totale = models.FloatField(default=0.0)
 
     def __str__(self):

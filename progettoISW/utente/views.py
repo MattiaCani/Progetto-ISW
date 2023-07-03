@@ -5,7 +5,7 @@ from django.contrib.auth import login, authenticate, logout
 from django.shortcuts import HttpResponse, redirect, get_object_or_404
 from django.shortcuts import render
 from utente.forms.auth import LoginForm, SignupForm
-from utente.forms.forms_ordini import AggiuntaIndirizzo, AggiuntaPagamento
+from utente.forms.forms_ordini import AggiuntaIndirizzo, AggiuntaPagamento, QuantitaProdotto
 from utente.models import Utente, Carrello, Prodotto, Ordine, ProdottoCarrello
 import datetime
 
@@ -62,11 +62,30 @@ def signup_view(request):
 def carrello(request):
     carrello_utente = get_object_or_404(Carrello, possessore=request.user)
 
-    form_quantita = request.POST.get('quantita_acquisto')
+    form_quantita = QuantitaProdotto()
 
-    # Gestione della quantita da fare
+    return render(request, "carrello/carrello.html", {"carrello": carrello_utente, "form_quantita": form_quantita})
 
-    return render(request, "carrello/carrello.html", {"carrello": carrello_utente, "form": form_quantita})
+
+def update_quantita(request, codice_seriale):
+    if request.method == 'POST':
+        form_quantita = QuantitaProdotto(request.POST)
+
+        if form_quantita.is_valid():
+            quantita_acquisto = form_quantita.cleaned_data['quantita_acquisto']
+
+            carrello_utente = get_object_or_404(Carrello, possessore=request.user)
+            prodotto_carrello = carrello_utente.lista_prodotti.get(prodotto_id=codice_seriale)
+
+            carrello_utente.importo_totale -= prodotto_carrello.prodotto.prezzo * prodotto_carrello.quantita_acquisto
+
+            prodotto_carrello.quantita_acquisto = quantita_acquisto
+            prodotto_carrello.save()
+
+            carrello_utente.importo_totale += prodotto_carrello.prodotto.prezzo * float(quantita_acquisto)
+            carrello_utente.save()
+
+            return redirect('carrello')
 
 
 def aggiungi_al_carrello(request, codice_seriale, quantita_acquisto):
