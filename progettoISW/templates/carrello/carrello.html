@@ -46,7 +46,9 @@
             </tr>
             <tr id="checkout">
                 <td colspan="4"></td>
-                <td><a href="{% url 'ordine' %}">Checkout</a></td>
+                <td>
+                    <button class="fakeButton" onclick="window.location.href='{% url 'ordine' %}'">Checkout </button
+                </td>
             </tr>
         </tbody>
       </table>
