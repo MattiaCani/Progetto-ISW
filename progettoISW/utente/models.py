@@ -3,7 +3,6 @@ from utente.enums import MetodoPagamento
 from django.contrib.auth.models import AbstractUser
 from vetrine.models import VetrinaAmministratore, Vetrina, ResocontoVendite
 
-
 class Utente(AbstractUser):
     email = models.EmailField(max_length=30, unique=True)
 
