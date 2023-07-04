@@ -115,7 +115,23 @@ USE_TZ = True
 # https://docs.djangoproject.com/en/4.2/howto/static-files/
 
 STATIC_URL = 'static/'
+STATIC_ROOT = STATIC_URL
+STAIC_ROOT = os.path.join(BASE_DIR, 'static')
 
+# List of finder classes that know how to find static files in
+# various locations.
+STATICFILES_FINDERS = (
+    'django.contrib.staticfiles.finders.FileSystemFinder',
+    'django.contrib.staticfiles.finders.AppDirectoriesFinder',
+)
+STATIC_FINDERS = STATICFILES_FINDERS
+
+STATICFILES_DIRS = [
+    os.path.join(BASE_DIR, 'vetrine', 'static'),
+    os.path.join(BASE_DIR, 'utente', 'static'),
+]
+
+STATIC_DIRS = STATICFILES_DIRS
 # Default primary key field type
 # https://docs.djangoproject.com/en/4.2/ref/settings/#default-auto-field
 
