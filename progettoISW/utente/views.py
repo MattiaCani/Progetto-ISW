@@ -5,7 +5,7 @@ from django.contrib.auth import login, authenticate, logout
 from django.shortcuts import HttpResponse, redirect, get_object_or_404
 from django.shortcuts import render
 from utente.forms.auth import LoginForm, SignupForm
-from utente.forms.forms_ordini import AggiuntaIndirizzo, AggiuntaPagamento, QuantitaProdotto
+from utente.forms.forms_ordini import AggiuntaIndirizzo, AggiuntaPagamento, QuantitaProdotto, QuantitaProdottoVetrina
 from utente.models import Utente, Carrello, Prodotto, Ordine, ProdottoCarrello
 import datetime
 
@@ -62,9 +62,15 @@ def signup_view(request):
 def carrello(request):
     carrello_utente = get_object_or_404(Carrello, possessore=request.user)
 
-    form_quantita = QuantitaProdotto()
+    form_quantita = []
 
-    return render(request, "carrello/carrello.html", {"carrello": carrello_utente, "form_quantita": form_quantita})
+    for item in carrello_utente.lista_prodotti.all():
+        form_quantita.append(QuantitaProdotto(initial_value=item.quantita_acquisto))
+
+    carrello_ = zip(carrello_utente.lista_prodotti.all(), form_quantita)
+    importo_totale = carrello_utente.importo_totale
+
+    return render(request, "carrello/carrello.html", {"carrello": carrello_, "importo_totale": importo_totale})
 
 
 def update_quantita(request, codice_seriale):
@@ -88,19 +94,30 @@ def update_quantita(request, codice_seriale):
             return redirect('carrello')
 
 
-def aggiungi_al_carrello(request, codice_seriale, quantita_acquisto):
-    prodotto = get_object_or_404(Prodotto, pk=codice_seriale)
-    prodotto_carrello = ProdottoCarrello.objects.create(utente=request.user, prodotto=prodotto, quantita_acquisto=quantita_acquisto)
+def aggiungi_al_carrello(request, codice_seriale):
 
-    carrello_utente = get_object_or_404(Carrello, possessore=request.user)
-    carrello_utente.lista_prodotti.add(prodotto_carrello)
+    if request.method == 'POST':
+        form_quantita = QuantitaProdottoVetrina(request.POST)
 
-    carrello_utente.importo_totale += prodotto.prezzo * quantita_acquisto
+        if form_quantita.is_valid():
+            quantita_acquisto = form_quantita.cleaned_data['quantita_acquisto']
 
-    carrello_utente.save()
-    prodotto_carrello.save()
+            prodotto = get_object_or_404(Prodotto, pk=codice_seriale)
+            carrello_utente = get_object_or_404(Carrello, possessore=request.user)
 
-    return redirect('vetrina')
+            try:
+                carrello_utente.lista_prodotti.get(utente=request.user, prodotto=prodotto)
+            except ProdottoCarrello.DoesNotExist:
+                prodotto_carrello = ProdottoCarrello.objects.create(utente=request.user, prodotto=prodotto, quantita_acquisto=float(quantita_acquisto))
+
+                carrello_utente.lista_prodotti.add(prodotto_carrello)
+
+                carrello_utente.importo_totale += prodotto.prezzo * float(quantita_acquisto)
+
+                carrello_utente.save()
+                prodotto_carrello.save()
+
+            return redirect('vetrina')
 
 
 def rimuovi_dal_carrello(request, codice_seriale):
@@ -111,6 +128,8 @@ def rimuovi_dal_carrello(request, codice_seriale):
     carrello_utente.importo_totale -= prodotto_carrello.prodotto.prezzo * prodotto_carrello.quantita_acquisto
 
     get_object_or_404(ProdottoCarrello, utente=request.user, prodotto=prodotto).delete()
+
+    carrello_utente.save()
 
     return redirect('carrello')
 

@@ -22,7 +22,7 @@
         </thead>
 
         <tbody>
-            {% for item in carrello.lista_prodotti.all %}
+            {% for item, form_item in carrello %}
                 <form action="{%  url 'update_quantita' item.prodotto.codice_seriale %}" method="POST">
                     {% csrf_token %}
                     <tr id="{{ item.prodotto.codice_seriale }}">
@@ -30,7 +30,7 @@
                         <td>{{ item.prodotto.tipologia }}</td>
                         <td>
                             <label for="quantita_acquisto">
-                                {{ form_quantita.as_div }}
+                                {{ form_item.as_div }}
                             </label>
                         </td>
                         <td>
@@ -42,7 +42,7 @@
             {% endfor %}
             <tr id="totale">
                 <td colspan="4">Totale</td>
-                <td>{{ carrello.importo_totale }}€</td>
+                <td>{{ importo_totale }}€</td>
             </tr>
             <tr id="checkout">
                 <td colspan="4"></td>

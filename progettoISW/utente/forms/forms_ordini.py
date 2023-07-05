@@ -16,3 +16,14 @@ class AggiuntaPagamento(forms.ModelForm):
 class QuantitaProdotto(forms.Form):
     quantita_acquisto = forms.ChoiceField(label="", choices=[(str(i), str(i)) for i in range(1, 11)],
                                           widget=forms.Select(attrs={'onchange': 'this.form.submit()'}))
+
+    def __init__(self, *args, **kwargs):
+        initial_value = kwargs.pop('initial_value', None)
+        super().__init__(*args, **kwargs)
+        if initial_value is not None:
+            self.fields['quantita_acquisto'].initial = initial_value
+
+
+class QuantitaProdottoVetrina(forms.Form):
+    quantita_acquisto = forms.ChoiceField(label="", choices=[(str(i), str(i)) for i in range(1, 11)])
+

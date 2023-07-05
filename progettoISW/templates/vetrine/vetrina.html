@@ -57,20 +57,23 @@
 
               <tbody>
                 {% for item in elenco_prodotti %}
-                    <tr>
-                      <td>{{ item.nome }}</td>
-                      <td>{{ item.tipologia }}</td>
-                      <td>{{ item.descrizione }}</td>
-                      <td>{{ item.prezzo }}€</td>
-                        <td>
-                            <label for="quantita_acquisto" onchange="onChange()">
-                                <input type="number" id="quantita_acquisto" min="1" max="10" value="1"/>
-                            </label>
-                        </td>
-                      <td>
-                          <a href="{% url 'aggiungi_al_carrello' item.codice_seriale item.disponibilita %}">Aggiungi al carrello</a>
-                      </td>
-                    </tr>
+                    <form action="{%  url 'aggiungi_al_carrello' item.codice_seriale %}" method="POST">
+                        {% csrf_token %}
+                        <tr id="{{ item.codice_seriale }}">
+                          <td>{{ item.nome }}</td>
+                          <td>{{ item.tipologia }}</td>
+                          <td>{{ item.descrizione }}</td>
+                          <td>{{ item.prezzo }}€</td>
+                            <td>
+                                <label for="quantita_acquisto">
+                                    {{ form_quantita.as_div }}
+                                </label>
+                            </td>
+                          <td>
+                              <button type="submit">Aggiungi al carrello</button>
+                          </td>
+                        </tr>
+                    </form>
                 {% endfor %}
               </tbody>
           </table>

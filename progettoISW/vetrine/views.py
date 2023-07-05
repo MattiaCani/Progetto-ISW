@@ -2,6 +2,7 @@ from django.contrib.auth.decorators import login_required, user_passes_test
 from django.shortcuts import render, redirect, get_object_or_404
 from vetrine.forms.forms_prodotti import NuovoProdottoForm, ModificaProdottoForm
 from vetrine.models import VetrinaAmministratore, Vetrina
+from utente.forms.forms_ordini import QuantitaProdottoVetrina
 from utente.models import Prodotto
 from django.db.models import Q  # classe per effettuare query complesse al DB
 
@@ -51,6 +52,7 @@ def carica_vetrina(request, tipo_vetrina):
 @user_passes_test(lambda u: not u.is_superuser)
 def vetrina_cliente_view(request):
     context = carica_vetrina(request, get_object_or_404(Vetrina))
+    context['form_quantita'] = QuantitaProdottoVetrina()
     return render(request, "vetrine/vetrina.html", context=context)
 
 
