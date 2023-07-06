@@ -63,6 +63,7 @@ def vetrina_amministratore_view(request):
     return render(request, "vetrine/vetrinaAmministratore.html", context=context)
 
 
+
 @login_required
 @user_passes_test(lambda u: u.is_superuser)
 def nuovo_prodotto_view(request):

@@ -1,4 +1,5 @@
 from django.conf import settings
+from django.core.exceptions import ObjectDoesNotExist
 
 from . import forms
 from django.contrib.auth import login, authenticate, logout
@@ -7,12 +8,28 @@ from django.shortcuts import render
 from utente.forms.auth import LoginForm, SignupForm
 from utente.forms.forms_ordini import AggiuntaIndirizzo, AggiuntaPagamento, QuantitaProdotto, QuantitaProdottoVetrina
 from utente.models import Utente, Carrello, Prodotto, Ordine, ProdottoCarrello
+from vetrine.models import VetrinaAmministratore, Vetrina
 import datetime
 
 
 def logout_view(request):
     logout(request)
     return redirect('login')
+
+
+def inizializzaVetrine():
+    try:
+        vetrina = Vetrina.objects.get(ID_vetrina="Vetrina")
+    except ObjectDoesNotExist:
+        vetrina = Vetrina.objects.create(ID_vetrina="Vetrina")
+
+    try:
+        vetrina_amministratore = VetrinaAmministratore.objects.get(
+            ID_vetrina_admin="Vetrina Amministratore")
+    except ObjectDoesNotExist:
+        vetrina_amministratore = VetrinaAmministratore.objects.create(
+            ID_vetrina_admin="Vetrina Amministratore",
+            vetrina=vetrina)
 
 
 def login_view(request):
@@ -30,6 +47,8 @@ def login_view(request):
 
             if user is not None:
                 login(request, user)
+
+                inizializzaVetrine()
 
                 if user.is_superuser:  # redirect a vetrina diversa a seconda che sia admin o no
                     if Utente.objects.filter(username=user.username, is_superuser=True).exists():
@@ -51,6 +70,8 @@ def signup_view(request):
 
         if form.is_valid():
             form.save()
+
+            inizializzaVetrine()
 
             # login(request, authenticate(username=form.cleaned_data['username'], password=form.cleaned_data['password1']))
 

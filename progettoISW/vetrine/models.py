@@ -2,14 +2,14 @@ from django.db import models
 
 
 class ResocontoVendite(models.Model):
+    ID_resoconto = models.CharField(max_length=30, default="Resoconto", primary_key=True)
     totaleVendite = models.FloatField
 
-    def __init__(self, totaleVendite, *args, **kwargs):
-        super().__init__(*args, **kwargs)
-        self.totaleVendite = totaleVendite
-
     def __str__(self):
-        return self.totaleVendite
+        return self.ID_resoconto
+
+    class Meta:
+        verbose_name_plural = "Resoconti"
 
 
 class Vetrina(models.Model):
