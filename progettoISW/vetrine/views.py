@@ -1,4 +1,5 @@
 from django.contrib.auth.decorators import login_required, user_passes_test
+from django.contrib import messages
 from django.shortcuts import render, redirect, get_object_or_404
 from vetrine.forms.forms_prodotti import NuovoProdottoForm, ModificaProdottoForm
 from vetrine.models import VetrinaAmministratore, Vetrina
@@ -12,31 +13,12 @@ def carica_vetrina(request, tipo_vetrina):
     elenco_tipologie = elenco_prodotti.values('tipologia').distinct()
     message = 'Nessun prodotto attualmente in vendita :('
 
-    # Applicazione dei filtri
-    tipologia = request.GET.get('tipologia')
-    disponibilita = request.GET.get('disponibilita')
-    prezzo_min = request.GET.get('prezzo_min')
-    prezzo_max = request.GET.get('prezzo_max')
+    if not request.user.is_superuser:
+        elenco_prodotti = tipo_vetrina.prodotto_set.exclude(disponibilita=0)
 
-    if tipologia:
-        elenco_prodotti = elenco_prodotti.filter(tipologia=tipologia)
-    if disponibilita:
-        elenco_prodotti = elenco_prodotti.filter(disponibilita__=disponibilita)
-    if prezzo_min:
-        elenco_prodotti = elenco_prodotti.filter(prezzo__gte=prezzo_min)  # maggiore o uguale
-    if prezzo_max:
-        elenco_prodotti = elenco_prodotti.filter(prezzo__lte=prezzo_max)  # minore o uguale
-
-    # Ricerca dei prodotti
-    search_query = request.GET.get('search_query')
-    if search_query:
-        elenco_prodotti = elenco_prodotti.filter(
-            Q(nome__icontains=search_query) | Q(descrizione__icontains=search_query))
-
-    # Azzeramento filtri
-    reset_filters = request.GET.get('reset_filters')
-    if reset_filters:
-        elenco_prodotti = get_object_or_404(Vetrina).prodotto_set.all()
+    tipologia, elenco_prodotti = tipo_vetrina.aggiungi_filtro(request, elenco_prodotti)
+    elenco_prodotti = tipo_vetrina.ricerca_prodotto(request, elenco_prodotti)
+    elenco_prodotti = tipo_vetrina.azzera_filtri(request, elenco_prodotti)
 
     context = {
         'elenco_prodotti': elenco_prodotti,
@@ -63,7 +45,6 @@ def vetrina_amministratore_view(request):
     return render(request, "vetrine/vetrinaAmministratore.html", context=context)
 
 
-
 @login_required
 @user_passes_test(lambda u: u.is_superuser)
 def nuovo_prodotto_view(request):
@@ -72,9 +53,7 @@ def nuovo_prodotto_view(request):
 
         if form.is_valid():
             form.save()
-
             return redirect('vetrinaAmministratore')
-
     else:
         form = NuovoProdottoForm()
 

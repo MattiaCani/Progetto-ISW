@@ -8,24 +8,17 @@ from django.contrib.auth import login, authenticate, logout
 from django.shortcuts import HttpResponse, redirect, get_object_or_404
 from django.shortcuts import render
 from utente.forms.auth import LoginForm, SignupForm
-from utente.forms.forms_ordini import AggiuntaIndirizzo, AggiuntaPagamento, QuantitaProdotto, QuantitaProdottoVetrina, \
-    Pagamento
-from utente.models import Utente, Carrello, Prodotto, Ordine, ProdottoCarrello
+
+from utente.forms.forms_ordini import AggiuntaIndirizzo, AggiuntaPagamento, QuantitaProdotto, QuantitaProdottoVetrina
+from utente.models import Utente, Carrello, Prodotto, Ordine, ProdottoCarrello, SessionManager
 from vetrine.models import VetrinaAmministratore, Vetrina
 from django.core import serializers
 import datetime
 
 
 def logout_view(request):
-    logout(request)
+    SessionManager.logout_manager(request)
     return redirect('login')
-
-
-def inizializza_vetrine():
-    try:
-        Vetrina.objects.get(ID_vetrina="Vetrina")
-    except ObjectDoesNotExist:
-        Vetrina.objects.create(ID_vetrina="Vetrina")
 
 
 def login_view(request):
@@ -34,26 +27,17 @@ def login_view(request):
 
     if request.method == 'POST':
         form = forms.auth.LoginForm(request.POST)
+        user = SessionManager.login_manager(request, form)
 
-        if form.is_valid():
-            user = authenticate(
-                username=form.cleaned_data['username'],
-                password=form.cleaned_data['password'],
-            )
-
-            if user is not None:
-                login(request, user)
-
-                inizializza_vetrine()
-
-                if user.is_superuser:  # redirect a vetrina diversa a seconda che sia admin o no
-                    if Utente.objects.filter(username=user.username, is_superuser=True).exists():
-                        return redirect('vetrinaAmministratore')
-                else:
-                    return redirect('vetrina')
-
+        if user is not None:
+            if user.is_superuser:  # redirect a vetrina diversa a seconda che sia admin o no
+                if Utente.objects.filter(username=user.username, is_superuser=True).exists():
+                    return redirect('vetrinaAmministratore')
             else:
-                message = 'Login fallito'
+                return redirect('vetrina')
+
+        else:
+            message = 'Login fallito'
 
     return render(request, 'registration/login.html', {'form': form, 'message': message})
 
@@ -64,13 +48,8 @@ def signup_view(request):
     if request.method == 'POST':
         form = forms.auth.SignupForm(request.POST)
 
-        if form.is_valid():
-            form.save()
-
-            inizializza_vetrine()
-
-            # login(request, authenticate(username=form.cleaned_data['username'], password=form.cleaned_data['password1']))
-
+        flag_valid = SessionManager.signup_manager(form)
+        if flag_valid:
             return redirect(settings.LOGIN_REDIRECT_URL)
 
     return render(request, 'registration/signup.html', {'form': form})
@@ -95,17 +74,11 @@ def update_quantita(request, codice_seriale):
         form_quantita = QuantitaProdotto(request.POST)
 
         if form_quantita.is_valid():
-            quantita_acquisto = form_quantita.cleaned_data['quantita_acquisto']
 
-            carrello_utente = get_object_or_404(Carrello, possessore=request.user)
-            prodotto_carrello = carrello_utente.lista_prodotti.get(prodotto_id=codice_seriale)
+            prodotto_carrello, carrello_utente = \
+                ProdottoCarrello.update_quantita(form_quantita, request, codice_seriale)
 
-            carrello_utente.importo_totale -= prodotto_carrello.prodotto.prezzo * prodotto_carrello.quantita_acquisto
-
-            prodotto_carrello.quantita_acquisto = quantita_acquisto
             prodotto_carrello.save()
-
-            carrello_utente.importo_totale += prodotto_carrello.prodotto.prezzo * float(quantita_acquisto)
             carrello_utente.save()
 
             return redirect('carrello')
@@ -115,37 +88,17 @@ def aggiungi_al_carrello(request, codice_seriale):
     if request.method == 'POST':
         form_quantita = QuantitaProdottoVetrina(request.POST)
 
-        if form_quantita.is_valid():
-            quantita_acquisto = form_quantita.cleaned_data['quantita_acquisto']
+        carrello_utente, prodotto_carrello = Prodotto.aggiungi_al_carrello(form_quantita, codice_seriale, request)
+        if prodotto_carrello is not None and carrello_utente is not None:
+            carrello_utente.save()
+            prodotto_carrello.save()
 
-            prodotto = get_object_or_404(Prodotto, pk=codice_seriale)
-            carrello_utente = get_object_or_404(Carrello, possessore=request.user)
-
-            try:
-                carrello_utente.lista_prodotti.get(utente=request.user, prodotto=prodotto)
-            except ProdottoCarrello.DoesNotExist:
-                prodotto_carrello = ProdottoCarrello.objects.create(utente=request.user, prodotto=prodotto,
-                                                                    quantita_acquisto=float(quantita_acquisto))
-
-                carrello_utente.lista_prodotti.add(prodotto_carrello)
-
-                carrello_utente.importo_totale += prodotto.prezzo * float(quantita_acquisto)
-
-                carrello_utente.save()
-                prodotto_carrello.save()
-
-            return redirect('vetrina')
+        return redirect('vetrina')
 
 
 def rimuovi_dal_carrello(request, codice_seriale):
-    prodotto = get_object_or_404(Prodotto, pk=codice_seriale)
-    carrello_utente = get_object_or_404(Carrello, possessore=request.user)
-    prodotto_carrello = carrello_utente.lista_prodotti.get(utente=request.user, prodotto=prodotto)
 
-    carrello_utente.importo_totale -= prodotto_carrello.prodotto.prezzo * prodotto_carrello.quantita_acquisto
-
-    get_object_or_404(ProdottoCarrello, utente=request.user, prodotto=prodotto).delete()
-
+    carrello_utente = ProdottoCarrello.rimuovi_dal_carrello(request, codice_seriale)
     carrello_utente.save()
 
     return redirect('carrello')
@@ -157,43 +110,9 @@ def ordine(request):
         form_pagamento = AggiuntaPagamento(request.POST)
 
         if form_indirizzo.is_valid() and form_pagamento.is_valid():
-            indirizzo = form_indirizzo.cleaned_data['indirizzo_spedizione']
 
-            numero_carta = form_pagamento.cleaned_data['numero_carta']
-            intestatario = form_pagamento.cleaned_data['intestatario']
-            nome_metodo = form_pagamento.cleaned_data['nome_metodo']
-
-            cliente = get_object_or_404(Utente, username=request.user)
-            carrello_cliente = get_object_or_404(Carrello, possessore=request.user)
-
-            dati_carrello = {}
-
-            for prodotto in carrello_cliente.lista_prodotti.all():
-                prodotto.prodotto.pezzi_venduti += prodotto.quantita_acquisto
-                prodotto.prodotto.disponibilita -= prodotto.quantita_acquisto
-                prodotto.prodotto.save()
-
-                dati_carrello[str(prodotto.prodotto.nome)] = prodotto.quantita_acquisto
-
-            json_carrello = json.dumps(dati_carrello)
-
-            nuovo_ordine = Ordine.objects.create(
-                cliente=cliente,
-                carrello=json_carrello,
-                email_cliente=cliente.email,
-                nome_cliente=cliente.first_name,
-                numero_ordine=hash(carrello_cliente.lista_prodotti),
-                data_ordine=datetime.datetime.now(),
-                indirizzo_spedizione=indirizzo,
-                numero_carta=numero_carta,
-                intestatario=intestatario,
-                nome_metodo=nome_metodo
-            )
-
+            nuovo_ordine, carrello_cliente = Ordine.ordina(request, form_indirizzo, form_pagamento)
             nuovo_ordine.save()
-
-            carrello_cliente.importo_totale = 0
-            carrello_cliente.lista_prodotti.all().delete()
             carrello_cliente.save()
 
             return redirect("vetrina")
