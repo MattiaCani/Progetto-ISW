@@ -3,6 +3,7 @@ from utente.enums import MetodoPagamento
 from django.contrib.auth.models import AbstractUser
 from vetrine.models import VetrinaAmministratore, Vetrina, ResocontoVendite
 
+
 class Utente(AbstractUser):
     email = models.EmailField(max_length=30, unique=True)
 
@@ -44,6 +45,9 @@ class ProdottoCarrello(models.Model):
     def __str__(self):
         return str(self.prodotto)
 
+    class Meta:
+        verbose_name_plural = "Prodotti Carrello"
+
 
 class Carrello(models.Model):
     possessore = models.OneToOneField(Utente, on_delete=models.CASCADE, null=True)
@@ -71,16 +75,15 @@ class Pagamento(models.Model):
 
 class Ordine(models.Model):
     cliente = models.ForeignKey(Utente, on_delete=models.CASCADE, null=True)
-    carrello = models.OneToOneField(Carrello, on_delete=models.CASCADE, null=True)
+    carrello = models.JSONField()
     email_cliente = models.EmailField(max_length=30)
     nome_cliente = models.CharField(max_length=30)
     numero_ordine = models.PositiveIntegerField(unique=True, primary_key=True)
-    data_ordine = models.DateTimeField
+    data_ordine = models.DateTimeField("data ordine")
     indirizzo_spedizione = models.CharField(max_length=50)
-    info_pagamento = Pagamento(numero_carta=models.BigIntegerField,
-                               intestatario=models.CharField(max_length=50),
-                               nome_metodo=models.CharField(max_length=20, choices=MetodoPagamento.choices,
-                                                           default=MetodoPagamento.CREDITO))
+    numero_carta = models.BigIntegerField()
+    intestatario = models.CharField(max_length=50)
+    nome_metodo = models.CharField(max_length=20, choices=MetodoPagamento.choices, default=MetodoPagamento.CREDITO)
 
     def __str__(self):
         return str(self.numero_ordine)

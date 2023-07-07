@@ -1,9 +1,9 @@
-from django.contrib import admin
-# credenziali superuser
-# username: roberta, password: Berdjango
+import json
 
-# Register your models here.
-from .models import Pagamento, Carrello, Ordine, Prodotto, Utente, ProdottoCarrello
+from django.contrib import admin
+
+from .models import Carrello, Ordine, Prodotto, Utente, ProdottoCarrello
+from django.utils.safestring import mark_safe
 
 
 class CartAdmin(admin.ModelAdmin):
@@ -31,10 +31,27 @@ class UsersAdmin(admin.ModelAdmin):
     list_display = ['username', 'is_superuser', 'email']
 
 
+class OrdersAdmin(admin.ModelAdmin):
+    fieldsets = [
+        ("Credenziali", {"fields": ["cliente", "email_cliente", "nome_cliente"]}),
+        ("Ricevuta", {"fields": ["numero_ordine", "indirizzo_spedizione", "data_ordine", "numero_carta", "intestatario", "nome_metodo"]}),
+        ("Prodotti", {"fields": ['dati_carrello']})
+    ]
+    readonly_fields = ['dati_carrello']
+    list_display = ['numero_ordine', 'cliente', 'data_ordine']
+
+    def dati_carrello(self, instance):
+        formatted_json = json.dumps(json.loads(instance.carrello), sort_keys=True, indent=2)
+
+        formatted_html = '<pre>{}</pre>'.format(formatted_json)
+        return mark_safe(formatted_html)
+
+    dati_carrello.short_description = 'Dati carrello'
+
+
 admin.site.register(Utente, UsersAdmin)
 admin.site.register(Carrello, CartAdmin)
 admin.site.register(Prodotto, ProductAdmin)
 admin.site.register(ProdottoCarrello, ProductCartAdmin)
 
-admin.site.register(Pagamento)
-admin.site.register(Ordine)
+admin.site.register(Ordine, OrdersAdmin)
