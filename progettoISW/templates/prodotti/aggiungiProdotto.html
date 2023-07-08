@@ -1,23 +1,33 @@
+{% extends 'base.html' %}
+{% load static %}
+
 <!DOCTYPE html>
 <html lang="en">
 
+{% block head %}
 <head>
     <meta charset="UTF-8">
     <title>Aggiungi Prodotto</title>
+    <link rel="stylesheet" href="{% static 'css/newProdotto.css' %}">
 </head>
-
+{% endblock head %}
 <body>
-    <h1>Nuovo prodotto</h1>
-    {% extends 'base.html' %}
+
     {% block content %}
-        {% if form.errors %}
-            {{ form.errors }}
-        {% endif %}
-        <form method="post">
-            {{ form.as_p }}
-            {% csrf_token %}
-            <button type="submit" >Submit</button>
-        </form>
+        <div>
+            <button class="fakeButton fake1" onclick="window.location.href='{% url 'vetrinaAmministratore' %}'">Torna alla Vetrina</button>
+        </div>
+        <div class="centerPage">
+            <div class="containerNewP">
+                <h1>Nuovo prodotto</h1>
+                <form class="form-newP filtri" method="post">
+                    {{ form.as_p }}
+                    {% csrf_token %}
+                    <button type="submit" >Submit</button>
+                </form>
+
+            </div>
+        </div>
     {% endblock content %}
 </body>
 </html>

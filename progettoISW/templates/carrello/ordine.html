@@ -1,21 +1,33 @@
+{% extends 'base.html' %}
+{% load static %}
+
 <!DOCTYPE html>
 <html lang="en">
-
+{% block head %}
 <head>
     <meta charset="UTF-8">
-    <title>Ordine</title>
+    <link rel="stylesheet" href="{% static 'css/ordine.css' %}">
 </head>
-
-<body>
-    <h1>Ordine</h1>
-    {% extends 'base.html' %}
+{% endblock head %}
+    <body>
     {% block content %}
-        <form method="post">
-            {% csrf_token %}
-            {{ form_indirizzo.as_p }}
-            {{ form_pagamento.as_p }}
-            <input type="submit" value="Ordina">
-        </form>
+        <h1>Ordine</h1>
+        <div class="centerPage">
+            <div class="containerOrdine">
+
+                    <form class="form-ordine" method="post">
+                        {% csrf_token %}
+                        {{ form_indirizzo.as_p }}
+                        {{ form_pagamento.as_p }}
+                        <input type="submit" value="Ordina">
+                    </form>
+
+            </div>
+        </div>
+        <div>
+            <button class="fakeButton" onclick="window.location.href='{% url 'vetrina' %}'">Torna alla Vetrina</button>
+        </div>
     {% endblock content %}
-</body>
+
+    </body>
 </html>
