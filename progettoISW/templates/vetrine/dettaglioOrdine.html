@@ -1,0 +1,15 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Dettagli ordine</title>
+</head>
+<body>
+    {% block content %}
+  <h2>Ordine: {{ ordine.numero_ordine }}</h2>
+<table>
+    {{ ordine.stampa_acquisti|safe }}
+</table>
+    {% endblock content %}
+</body>
+</html>

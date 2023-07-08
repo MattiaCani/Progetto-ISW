@@ -33,11 +33,12 @@ class UsersAdmin(admin.ModelAdmin):
 
 class OrdersAdmin(admin.ModelAdmin):
     fieldsets = [
-        ("Credenziali", {"fields": ["cliente", "email_cliente", "nome_cliente"]}),
+        ("Credenziali", {"fields": ["cliente", "get_email", "get_name"]}),
         ("Ricevuta", {"fields": ["numero_ordine", "indirizzo_spedizione", "data_ordine", "numero_carta", "intestatario", "nome_metodo"]}),
-        ("Prodotti", {"fields": ['dati_carrello']})
+        ("Prodotti", {"fields": ['dati_carrello', 'importo_totale']})
     ]
-    readonly_fields = ['dati_carrello']
+
+    readonly_fields = ['dati_carrello', 'importo_totale', 'get_email', 'get_name']
     list_display = ['numero_ordine', 'cliente', 'data_ordine']
 
     def dati_carrello(self, instance):
@@ -45,6 +46,14 @@ class OrdersAdmin(admin.ModelAdmin):
 
         formatted_html = '<pre>{}</pre>'.format(formatted_json)
         return mark_safe(formatted_html)
+
+    @admin.display(description='Email')
+    def get_email(self, obj):
+        return obj.cliente.email
+
+    @admin.display(description='Nome cliente')
+    def get_name(self, obj):
+        return obj.cliente.first_name
 
     dati_carrello.short_description = 'Dati carrello'
 

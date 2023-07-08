@@ -6,7 +6,10 @@ from django.db.models import Q  # classe per effettuare query complesse al DB
 
 class ResocontoVendite(models.Model):
     ID_resoconto = models.CharField(max_length=30, default="Resoconto", primary_key=True)
-    totaleVendite = models.FloatField
+
+    @property
+    def totale_vendite(self):
+        return sum(prodotto.guadagno_totale for prodotto in self.prodotto_set.all())
 
     def __str__(self):
         return self.ID_resoconto
@@ -23,6 +26,7 @@ class Vetrina(models.Model):
         super().save(*args, **kwargs)
         if is_new_instance:
             VetrinaAmministratore.objects.create(vetrina=self)
+            ResocontoVendite.objects.create()
 
     @staticmethod
     def aggiungi_filtro(request, elenco_prodotti):
@@ -73,9 +77,8 @@ class VetrinaAmministratore(models.Model):
     def __str__(self):
         return self.ID_vetrina_admin
 
-
-class Meta:
-    verbose_name_plural = "Vetrine Amministratore"
+    class Meta:
+        verbose_name_plural = "Vetrine Amministratore"
 
 
 def inizializza_vetrine():

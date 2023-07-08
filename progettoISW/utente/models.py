@@ -1,9 +1,10 @@
+from json2html import json2html
 from django.contrib.auth import authenticate, login, logout
 from django.db import models
 from django.shortcuts import get_object_or_404
 import json
 import datetime
-from vetrine.models import inizializza_vetrine
+from vetrine.models import inizializza_vetrine, ResocontoVendite
 from utente.enums import MetodoPagamento
 from django.contrib.auth.models import AbstractUser
 
@@ -61,7 +62,11 @@ class Prodotto(models.Model):
     prezzo = models.FloatField(default=0.0)
 
     vetrina = models.ForeignKey(Vetrina, on_delete=models.PROTECT, null=True, default="Vetrina")
-    resVendite = models.ForeignKey(ResocontoVendite, on_delete=models.PROTECT, null=True)
+    resoconto_vendite = models.ForeignKey(ResocontoVendite, on_delete=models.PROTECT, null=True, default="Resoconto")
+
+    @property
+    def guadagno_totale(self):
+        return self.pezzi_venduti * self.prezzo
 
     def __str__(self):
         return str(self.codice_seriale)
@@ -156,14 +161,36 @@ class Pagamento(models.Model):
 class Ordine(models.Model):
     cliente = models.ForeignKey(Utente, on_delete=models.CASCADE, null=True)
     carrello = models.JSONField()
-    email_cliente = models.EmailField(max_length=30)
-    nome_cliente = models.CharField(max_length=30)
-    numero_ordine = models.PositiveIntegerField(unique=True, primary_key=True)
+
+    numero_ordine = models.PositiveBigIntegerField(unique=True, primary_key=True)
     data_ordine = models.DateTimeField("data ordine")
+
     indirizzo_spedizione = models.CharField(max_length=50)
-    numero_carta = models.BigIntegerField()
+
+    numero_carta = models.PositiveBigIntegerField()
     intestatario = models.CharField(max_length=50)
     nome_metodo = models.CharField(max_length=20, choices=MetodoPagamento.choices, default=MetodoPagamento.CREDITO)
+
+    @property
+    def importo_totale(self):
+        acquisti = json.loads(self.carrello)
+
+        return sum(item['Prezzo'] * item['Quantita'] for item in acquisti)
+
+    @property
+    def stampa_acquisti(self):
+        acquisti = json.loads(self.carrello)
+
+        data = []
+
+        for item in acquisti:
+            data.append({
+                "Prodotto": item["Prodotto"],
+                "Prezzo": item["Prezzo"],
+                "Quantita": item["Quantita"]
+            })
+
+        return json2html.convert(json=data)
 
     def __str__(self):
         return str(self.numero_ordine)
@@ -179,22 +206,24 @@ class Ordine(models.Model):
         cliente = get_object_or_404(Utente, username=request.user)
         carrello_cliente = get_object_or_404(Carrello, possessore=request.user)
 
-        dati_carrello = {}
+        list_carrello = []
 
         for prodotto in carrello_cliente.lista_prodotti.all():
             prodotto.prodotto.pezzi_venduti += prodotto.quantita_acquisto
             prodotto.prodotto.disponibilita -= prodotto.quantita_acquisto
             prodotto.prodotto.save()
 
-            dati_carrello[str(prodotto.prodotto.nome)] = prodotto.quantita_acquisto
+            dati_carrello = {"Prodotto": str(prodotto.prodotto.nome),
+                             "Prezzo": prodotto.prodotto.prezzo,
+                             "Quantita": prodotto.quantita_acquisto}
 
-        json_carrello = json.dumps(dati_carrello)
+            list_carrello.append(dati_carrello)
+
+        json_carrello = json.dumps(list_carrello)
 
         nuovo_ordine = Ordine.objects.create(
             cliente=cliente,
             carrello=json_carrello,
-            email_cliente=cliente.email,
-            nome_cliente=cliente.first_name,
             numero_ordine=hash(carrello_cliente.lista_prodotti),
             data_ordine=datetime.datetime.now(),
             indirizzo_spedizione=indirizzo,
@@ -202,6 +231,7 @@ class Ordine(models.Model):
             intestatario=intestatario,
             nome_metodo=nome_metodo
         )
+
         carrello_cliente.importo_totale = 0
         carrello_cliente.lista_prodotti.all().delete()
 

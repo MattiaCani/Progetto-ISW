@@ -2,9 +2,9 @@ from django.contrib.auth.decorators import login_required, user_passes_test
 from django.contrib import messages
 from django.shortcuts import render, redirect, get_object_or_404
 from vetrine.forms.forms_prodotti import NuovoProdottoForm, ModificaProdottoForm
-from vetrine.models import VetrinaAmministratore, Vetrina
+from vetrine.models import VetrinaAmministratore, Vetrina, ResocontoVendite
 from utente.forms.forms_ordini import QuantitaProdottoVetrina
-from utente.models import Prodotto
+from utente.models import Prodotto, Ordine
 from django.db.models import Q  # classe per effettuare query complesse al DB
 
 
@@ -91,3 +91,24 @@ def modifica_prodotto_view(request, codice_seriale):
         }, instance=prodotto)
 
     return render(request, 'prodotti/modificaProdotto.html', {'form': form})
+
+
+@login_required()
+@user_passes_test(lambda u: u.is_superuser)
+def resoconto_vendite_view(request):
+    ordini = Ordine.objects.all()
+
+    resoconto_vendite = get_object_or_404(ResocontoVendite)
+
+    tot_prodotti = Prodotto.objects.all()
+
+    return render(request, 'vetrine/resocontoVendite.html',
+                  {'ordini': ordini, 'resoconto_vendite': resoconto_vendite, 'prodotti': tot_prodotti})
+
+
+@login_required()
+@user_passes_test(lambda u: u.is_superuser)
+def dettaglio_ordine_view(request, numero_ordine):
+    ordine = get_object_or_404(Ordine, numero_ordine=numero_ordine)
+
+    return render(request, 'vetrine/dettaglioOrdine.html', {'ordine': ordine})
