@@ -37,7 +37,7 @@ urlpatterns = [
     path('nuovoProdotto/', vetrine.views.nuovo_prodotto_view, name='nuovo_prodotto'),
     path('rimuovi_prodotto/<int:codice_seriale>/', vetrine.views.rimuovi_prodotto_view, name='rimuovi_prodotto'),
     path('modifica_prodotto/<int:codice_seriale>/', vetrine.views.modifica_prodotto_view, name='modifica_prodotto'),
-    path('resocontoVendite/', vetrine.views.resoconto_vendite_view, name='resoconto_vendite'),
+    path('vetrinaAmministratore/resocontoVendite/', vetrine.views.resoconto_vendite_view, name='resoconto_vendite'),
     path('dettaglioOrdine/<int:numero_ordine>/', vetrine.views.dettaglio_ordine_view, name='dettaglio_ordine')
 ]
 

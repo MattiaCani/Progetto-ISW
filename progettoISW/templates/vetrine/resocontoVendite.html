@@ -1,15 +1,26 @@
+{% extends 'base.html' %}
+{% load static %}
+
 <!DOCTYPE html>
 <html lang="en">
+{% block head %}
 <head>
     <meta charset="UTF-8">
     <title>Elenco Ordini</title>
-</head>
+     <link rel="stylesheet" type="text/css" href="{% static '/css/recontoOrdini.css' %}">
 
+</head>
+{% endblock head %}
 <body>
-    {% extends 'base.html' %}
+
     {% block content %}
+    <div>
+        <button class="fakeButton fake1" onclick="window.location.href='{% url 'vetrinaAmministratore' %}'">Torna alla Vetrina</button>
+    </div>
+    <div>
     <h2>Elenco Ordini</h2>
     <table>
+    <thead>
         <tr>
             <th>ID Cliente</th>
             <th>Email Cliente</th>
@@ -19,6 +30,7 @@
             <th>Indirizzo Spedizione</th>
             <th>Importo Totale</th>
         </tr>
+        </thead>
         {% for ordine in ordini %}
         <tr>
             <td>{{ ordine.cliente }}</td>
@@ -35,7 +47,8 @@
     </table>
 
     <br><h3>Vendite Prodotti</h3>
-    <table>
+    <table class="vendite">
+    <thead>
     <tr>
         <th>Nome prodotto</th>
         <th>Tipologia</th>
@@ -43,6 +56,7 @@
         <th>Pezzi venduti</th>
         <th>Totale euro Vendita</th>
     </tr>
+    </thead>
     {% for prodotto in prodotti %}
     <tr>
         <td>{{ prodotto.nome }}</td>
@@ -57,6 +71,7 @@
                 <td>{{ resoconto_vendite.totale_vendite }}€</td>
         </tr>
 </table>
+        </div>
 
     {% endblock content %}
 </body>

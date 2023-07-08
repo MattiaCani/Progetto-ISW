@@ -1,13 +1,24 @@
+{% extends 'base.html' %}
+{% load static %}
+
 <!DOCTYPE html>
 <html lang="en">
+{% block head %}
 <head>
     <meta charset="UTF-8">
-    <title>Dettagli ordine</title>
+    <title>Dettagli Ordine</title>
+     <link rel="stylesheet" type="text/css" href="{% static '/css/recontoOrdini.css' %}">
+
 </head>
+{% endblock head %}
 <body>
+
     {% block content %}
+    <div>
+        <button class="fakeButton fake1" onclick="window.location.href='{% url 'resoconto_vendite' %}'">Torna alla Vetrina</button>
+    </div>
   <h2>Ordine: {{ ordine.numero_ordine }}</h2>
-<table>
+<table class="table_ordine">
     {{ ordine.stampa_acquisti|safe }}
 </table>
     {% endblock content %}

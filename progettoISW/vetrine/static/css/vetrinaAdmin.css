@@ -20,6 +20,7 @@ a:hover {
 .centerSearch{
     display: flex;
     justify-content: center;
+    align-items: center;
 }
 
 .formSearch{
@@ -101,11 +102,12 @@ tr#totale:nth-last-child(2) {
     padding: 10px;
 }
 
-button{
+button {
     padding: 10px 20px;
     border: none;
     cursor: pointer;
     font-size: 16px;
+    margin-top: 10px;
     border-radius: 5px;
 }
 
@@ -129,15 +131,22 @@ button{
     background-color: #0056b3;
     color: white;
 }
-.fakeButton{
+.fakeButton {
     background-color: #F9AA60;
-    color:black;
+    color: black;
+    margin-top: 10px;
+    padding: 8px 30px;
+}
+
+.fake1 {
+    position: relative;
+    margin-left: 55%;
+    border-radius: 5px;
     margin-top: 10px;
 }
 .fakeButton:hover{
     background-color: #A85B00;
     color: white;
 }
-
 
 
