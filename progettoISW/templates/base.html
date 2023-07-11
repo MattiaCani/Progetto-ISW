@@ -1,20 +1,20 @@
 {% load static %}
-<!DOCTYPE html>
-<html lang="en">
-{% block head %}
-<head>
-    <meta charset="UTF-8">
-        <link rel="stylesheet" type="text/css" href="{% static '/css/vetrinaAdmin.css' %}">
-        <link rel="stylesheet" type="text/css" href="{% static '/css/vetrinaUtente.css' %}">
-        <link rel="stylesheet" href="{% static 'css/login.css' %}">
-</head>
-{% endblock head %}
-<body>
 
-      {% block content %}{% endblock content %}
-      {% if user.is_authenticated %}
-            <p >Sei loggato come {{ request.user }}. Clicca qui per il <a href="{% url 'logout' %}">log out</a></p>
-        {% endif %}
-</body>
+<!DOCTYPE html>
+<html lang="it">
+    {% block head %}
+        <head>
+            <meta charset="UTF-8">
+                <link rel="stylesheet" type="text/css" href="{% static '/css/vetrinaAdmin.css' %}">
+                <link rel="stylesheet" href="{% static 'css/login.css' %}">
+        </head>
+    {% endblock head %}
+
+    <body>
+          {% block content %}{% endblock content %}
+          {% if user.is_authenticated %}
+                <p>Sei loggato come <b>{{ request.user }}</b>. Clicca qui per il <a href="{% url 'logout' %}">log out</a></p>
+          {% endif %}
+    </body>
 </html>
 

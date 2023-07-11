@@ -10,20 +10,10 @@ class NuovoProdottoForm(forms.ModelForm):
         model = Prodotto
         fields = ["nome", "codice_seriale", "tipologia", "descrizione", "prezzo", "disponibilita"]
         labels = {
-            "nome": _("Nome"),
-            "codice_seriale": _("Codice seriale"),
-            "tipologia": _("Tipologia"),
-            "descrizione": _("Descrizione"),
-            "prezzo": _("Prezzo"),
             "disponibilita": _("Disponibilità"),
         }
         widgets = {
-            'nome': forms.TextInput(attrs={'class': 'form-control'}),
-            'codice_seriale': forms.TextInput(attrs={'class': 'form-control'}),
-            'tipologia': forms.TextInput(attrs={'class': 'form-control'}),
             'descrizione': forms.TextInput(attrs={'class': 'form-control'}),
-            'prezzo': forms.TextInput(attrs={'class': 'form-control'}),
-            'disponibilita': forms.TextInput(attrs={'class': 'form-control'}),
         }
 
 

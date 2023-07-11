@@ -1,58 +1,72 @@
 {% extends 'base.html' %}
 {% load static %}
+
 <!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <title>Vetrina</title>
-    <link rel="stylesheet" type="text/css" href="{% static '/css/vetrinaUtente.css' %}">
-</head>
+<html lang="it">
+
+{% block head %}
+    <head>
+        <meta charset="UTF-8">
+        <title>Vetrina</title>
+        <link rel="stylesheet" type="text/css" href="{% static '/css/vetrinaAdmin.css' %}">
+    </head>
+{% endblock head %}
 
 <body>
     {% block content %}
-    <script>
-        function onChange(event) {
-            console.log(event.target.value)
-        }
-    </script>
-    <h1>Visiona il nostro shop!</h1>
+        <script>
+            function onChange(event) {
+                console.log(event.target.value)
+            }
+        </script>
 
+        <h1>Visiona il nostro shop!</h1>
 
-      <!-- Filtri della vetrina -->
-    <div class="centerFiltri">
-              <form class="filtri" method="GET">
-                  <select name="tipologia">
-                      <option value="" selected>Tutte le tipologie</option>
-                      {% for item in elenco_tipologie %}
-                          <option value="{{ item.tipologia }}" {% if item.tipologia == tipologia_filtrata %} selected {% endif %}>{{ item.tipologia }}</option>
-                      {% endfor %}
-                  </select>
-                  <input type="number" name="disponibilita" placeholder="Filtro per disponibilità" value="{{ request.GET.disponibilita }}">
-                  <input type="number" name="prezzo_min" placeholder="Prezzo minimo" value="{{ request.GET.prezzo_min }}">
-                  <input type="number" name="prezzo_max" placeholder="Prezzo massimo" value="{{ request.GET.prezzo_max }}">
-                  <button type="submit">Filtra</button>
-                  <a href="?reset_filters=true">Azzeramento filtri</a>
-              </form>
-          </div>
-          <div class="centerSearch">
+        <div class="centerFiltri">
+        <form class="filtri" method="GET">
+
+            <select name="tipologia">
+                <option value="" selected>Tutte le tipologie</option>
+                {% for tipologia in elenco_tipologie %}
+                    <option value="{{ tipologia.tipologia }}" {% if tipologia.tipologia == tipologia_filtrata %} selected {% endif %}>{{ tipologia.tipologia }}</option>
+                {% endfor %}
+            </select>
+
+            <select name="disponibilita">
+                <option value="" selected>Qualsiasi disponibilità</option>
+                {% for disponibilita in elenco_disponibilita %}
+                    <option value="{{ disponibilita }}" {% if disponibilita == disponibilita_filtrata %} selected {% endif %}>{{ disponibilita }}</option>
+                {% endfor %}
+            </select>
+
+            <input type="number" name="prezzo_min" placeholder="Prezzo minimo" value="{{ request.GET.prezzo_min }}">
+            <input type="number" name="prezzo_max" placeholder="Prezzo massimo" value="{{ request.GET.prezzo_max }}">
+
+            <button type="submit">Filtra</button>
+
+            <a href="?reset_filters=true">Azzeramento filtri</a>
+
+        </form>
+    </div>
+
+        <div class="centerSearch">
         <form class="formSearch" method="GET">
-                      <input type="text" name="search_query" placeholder="Cerca prodotti" value="{{ request.GET.search_query }}">
-                      <button type="submit">Cerca</button>
-                  </form>
-              </div>
-          </div>
-      {% if elenco_prodotti.count == 0 %}{{ error_message }}{% endif %}
+            <input type="text" name="search_query" placeholder="Cerca prodotti" value="{{ request.GET.search_query }}">
+            <button type="submit">Cerca</button>
+        </form>
+    </div>
+
         <div class="centerTable cliente">
           <table>
               <thead>
                  <tr>
-                  <td>Nome prodotto</td>
-                  <td>Tipologia</td>
-                  <td>Descrizione</td>
-                  <td>Prezzo</td>
-                  <td>Quantità</td>
-                  <td>Azione</td>
-                </tr>
+                     <td>Nome prodotto</td>
+                     <td>Tipologia</td>
+                     <td>Descrizione</td>
+                     <td>Prezzo</td>
+                     <td>Quantità</td>
+                     <td>Azione</td>
+                 </tr>
               </thead>
 
               <tbody>
@@ -60,18 +74,18 @@
                     <form action="{%  url 'aggiungi_al_carrello' item.codice_seriale %}" method="POST">
                         {% csrf_token %}
                         <tr id="{{ item.codice_seriale }}">
-                          <td>{{ item.nome }}</td>
-                          <td>{{ item.tipologia }}</td>
-                          <td>{{ item.descrizione }}</td>
-                          <td>{{ item.prezzo }}€</td>
+                            <td>{{ item.nome }}</td>
+                            <td>{{ item.tipologia }}</td>
+                            <td>{{ item.descrizione }}</td>
+                            <td>{{ item.prezzo }}€</td>
                             <td>
                                 <label for="quantita_acquisto">
                                     {{ form_quantita.as_div }}
                                 </label>
                             </td>
-                          <td>
-                              <button type="submit">Aggiungi al carrello</button>
-                          </td>
+                            <td>
+                                <button type="submit" {% if item in carrello %} disabled {% endif %}>{% if item not in carrello %}Aggiungi al carrello{% else %}Già nel carrello{% endif %}</button>
+                            </td>
                         </tr>
                     </form>
                 {% endfor %}
@@ -81,6 +95,6 @@
         <div>
             <button class="fakeButton" onclick="window.location.href='{% url 'carrello' %}'">Apri carrello</button>
         </div>
-      {% endblock content %}
+    {% endblock content %}
 </body>
 </html>

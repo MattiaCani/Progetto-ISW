@@ -1,16 +1,19 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="it">
 
 <head>
-    <meta charset="UTF-8">
     <title>Carrello</title>
+    {% extends 'base.html' %}
 </head>
 
 <body>
-    <h1>Carrello</h1>
-    {% extends 'base.html' %}
     {% block content %}
-      <table id="prodotti_carrello">
+    <div>
+        <h1>Carrello</h1>
+        <button class="fakeButton fake1" onclick="window.location.href='{% url 'vetrina' %}'">Torna alla Vetrina</button>
+    </div>
+
+    <table id="prodotti_carrello">
         <thead>
             <tr>
                 <td>Nome prodotto</td>
@@ -22,36 +25,39 @@
         </thead>
 
         <tbody>
-            {% for item, form_item in carrello %}
-                <form action="{%  url 'update_quantita' item.prodotto.codice_seriale %}" method="POST">
+            {% for prodotto_carrello, form_quantita in carrello %}
+                <form action="{%  url 'update_quantita' prodotto_carrello.prodotto.codice_seriale %}" method="POST">
                     {% csrf_token %}
-                    <tr id="{{ item.prodotto.codice_seriale }}">
-                        <td>{{ item.prodotto.nome }}</td>
-                        <td>{{ item.prodotto.tipologia }}</td>
+                    <tr id="{{ prodotto_carrello.prodotto.codice_seriale }}">
+                        <td>{{ prodotto_carrello.prodotto.nome }}</td>
+                        <td>{{ prodotto_carrello.prodotto.tipologia }}</td>
                         <td>
                             <label for="quantita_acquisto">
-                                {{ form_item.as_div }}
+                                {{ form_quantita.as_div }}
                             </label>
                         </td>
                         <td>
-                            <a href="{% url 'rimuovi_dal_carrello' item.prodotto.codice_seriale %}">Rimuovi</a>
+                            <a href="{% url 'rimuovi_dal_carrello' prodotto_carrello.prodotto.codice_seriale %}">Rimuovi</a>
                         </td>
-                        <td>{{ item.prodotto.prezzo }}€</td>
+                        <td>{{ prodotto_carrello.importo_totale_prodotto }}€ ({{ prodotto_carrello.prodotto.prezzo }} al pz.)</td>
                     </tr>
                 </form>
             {% endfor %}
+
             <tr id="totale">
                 <td colspan="4">Totale</td>
                 <td>{{ importo_totale }}€</td>
             </tr>
+
             <tr id="checkout">
                 <td colspan="4"></td>
-                <td>
-                    <button class="fakeButton" onclick="window.location.href='{% url 'ordine' %}'">Checkout </button
-                </td>
+                <td><button class="fakeButton" onclick="window.location.href='{% url 'ordine' %}'">Checkout</button></td>
             </tr>
         </tbody>
-      </table>
+
+    </table>
+
   {% endblock content %}
 </body>
+
 </html>

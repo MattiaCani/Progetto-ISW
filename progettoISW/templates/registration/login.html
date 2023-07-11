@@ -1,20 +1,32 @@
 {% extends 'base.html' %}
 {% load static %}
 
+<!DOCTYPE html>
+<html lang="it">
+
 {% block head %}
-    <link rel="stylesheet" href="{% static 'css/login.css' %}">
+    <head>
+        <meta charset="UTF-8">
+        <title>Login</title>
+        <link rel="stylesheet" href="{% static 'css/login.css' %}">
+    </head>
 {% endblock head %}
-{% block content %}
-    <div class="centerPage">
-    <div class="containerLogin">
-<h1>Log In</h1>
-    <p>{{ message }}</p>
-    <form class="form-login" method="post">
-        {{ form.as_p }}
-        {% csrf_token %}
-        <button type="submit" >Submit</button>
-    </form>
-    <p>Nuovo utente? <a href="{% url 'signup' %}">Registrati!</a></p>
-    </div>
-    </div>
-{% endblock content %}
+
+<body>
+    {% block content %}
+        <div class="centerPage">
+            <div class="containerLogin">
+                <h1>Log In</h1>
+                <p>{{ login_error }}</p>
+                <form class="form-login" method="post">
+                    {% csrf_token %}
+                    {{ form_login.as_p }}
+                    <button type="submit">Submit</button>
+                </form>
+                <p>Nuovo utente? <a href="{% url 'signup' %}">Registrati!</a></p>
+            </div>
+        </div>
+    {% endblock content %}
+</body>
+
+</html>

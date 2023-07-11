@@ -90,9 +90,13 @@ td>div>a{
 tr:nth-child(even) {
     background-color: #f2f2f2;
 }
-/*a rule for the last-1 row in a table to change the background color*/
-tr#totale:nth-last-child(2) {
+
+#totale {
     background-color: #F9AA60;
+}
+
+#totale td {
+    text-align: center;
 }
 
 /* form e tasto aggiungi prodotto */
@@ -109,6 +113,7 @@ button {
     font-size: 16px;
     margin-top: 10px;
     border-radius: 5px;
+    background: palegreen;
 }
 
 .formAggiungi button[type="submit"] {
@@ -148,5 +153,4 @@ button {
     background-color: #A85B00;
     color: white;
 }
-
 

@@ -24,20 +24,26 @@ urlpatterns = [
     path('utente/', include('utente.urls')),
     path('vetrine/', include('vetrine.urls')),
     path('admin/', admin.site.urls),
+
     path('', utente.views.login_view, name='login'),
     path('logout/', utente.views.logout_view, name='logout'),
+    path('signup/', utente.views.signup_view, name='signup'),
+
     path('carrello/', utente.views.carrello, name='carrello'),
     path('ordine/', utente.views.ordine, name='ordine'),
     path('rimuovi_dal_carrello/<int:codice_seriale>/', utente.views.rimuovi_dal_carrello, name='rimuovi_dal_carrello'),
     path('aggiungi_al_carrello/<int:codice_seriale>/', utente.views.aggiungi_al_carrello, name='aggiungi_al_carrello'),
     path('update_quantita/<int:codice_seriale>/', utente.views.update_quantita, name='update_quantita'),
+
     path('vetrina/', vetrine.views.vetrina_cliente_view, name='vetrina'),
-    path('signup/', utente.views.signup_view, name='signup'),
-    path('vetrinaAmministratore/', vetrine.views.vetrina_amministratore_view, name='vetrinaAmministratore'),
-    path('nuovoProdotto/', vetrine.views.nuovo_prodotto_view, name='nuovo_prodotto'),
+    path('vetrina_amministratore/', vetrine.views.vetrina_amministratore_view, name='vetrina_amministratore'),
+
+    path('nuovo_prodotto/', vetrine.views.nuovo_prodotto_view, name='nuovo_prodotto'),
     path('rimuovi_prodotto/<int:codice_seriale>/', vetrine.views.rimuovi_prodotto_view, name='rimuovi_prodotto'),
     path('modifica_prodotto/<int:codice_seriale>/', vetrine.views.modifica_prodotto_view, name='modifica_prodotto'),
-    path('vetrinaAmministratore/resocontoVendite/', vetrine.views.resoconto_vendite_view, name='resoconto_vendite'),
-    path('dettaglioOrdine/<int:numero_ordine>/', vetrine.views.dettaglio_ordine_view, name='dettaglio_ordine')
+
+    path('vetrina_amministratore/resoconto_vendite/', vetrine.views.resoconto_vendite_view, name='resoconto_vendite'),
+    path('vetrina_amministratore/resoconto_vendite/dettaglio_ordine/<int:numero_ordine>/',
+         vetrine.views.dettaglio_ordine_view, name='dettaglio_ordine')
 ]
 

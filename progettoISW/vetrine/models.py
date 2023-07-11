@@ -1,6 +1,6 @@
 from django.core.exceptions import ObjectDoesNotExist
 from django.db import models
-from django.shortcuts import redirect, get_object_or_404
+from django.shortcuts import get_object_or_404
 from django.db.models import Q  # classe per effettuare query complesse al DB
 
 
@@ -35,20 +35,34 @@ class Vetrina(models.Model):
         prezzo_min = request.GET.get('prezzo_min')
         prezzo_max = request.GET.get('prezzo_max')
 
+        nd_i = 0
+        nd_f = 0
+
+        if disponibilita == 'Ultime scorte':
+            nd_i = 0
+            nd_f = 50
+        elif disponibilita == 'Disponibile':
+            nd_i = 50
+            nd_f = 600
+        elif disponibilita == 'Illimitata':
+            nd_i = 600
+            nd_f = 100000000
+
         if tipologia:
             elenco_prodotti = elenco_prodotti.filter(tipologia=tipologia)
         if disponibilita:
-            elenco_prodotti = elenco_prodotti.filter(disponibilita=disponibilita)
+            elenco_prodotti = elenco_prodotti.filter(disponibilita__gte=nd_i, disponibilita__lte=nd_f)
         if prezzo_min:
             elenco_prodotti = elenco_prodotti.filter(prezzo__gte=prezzo_min)  # maggiore o uguale
         if prezzo_max:
             elenco_prodotti = elenco_prodotti.filter(prezzo__lte=prezzo_max)  # minore o uguale
 
-        return tipologia, elenco_prodotti
+        return disponibilita, tipologia, elenco_prodotti
 
     @staticmethod
     def ricerca_prodotto(request, elenco_prodotti):
         search_query = request.GET.get('search_query')
+
         if search_query:
             elenco_prodotti = elenco_prodotti.filter(
                 Q(nome__icontains=search_query) | Q(descrizione__icontains=search_query))
@@ -58,6 +72,7 @@ class Vetrina(models.Model):
     @staticmethod
     def azzera_filtri(request, elenco_prodotti):
         reset_filters = request.GET.get('reset_filters')
+
         if reset_filters:
             elenco_prodotti = get_object_or_404(Vetrina).prodotto_set.all()
 

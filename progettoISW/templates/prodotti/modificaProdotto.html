@@ -1,37 +1,35 @@
 {% extends 'base.html' %}
 {% load static %}
 
-
-
-
 <!DOCTYPE html>
-<html lang="en">
+<html lang="it">
+
 {% block head %}
-<head>
-    <meta charset="UTF-8">
-    <title>Modifica Prodotto</title>
-    <link rel="stylesheet" href="{% static 'css/modificaProd.css' %}">
-</head>
+    <head>
+        <meta charset="UTF-8">
+        <title>Modifica Prodotto</title>
+        <link rel="stylesheet" href="{% static 'css/modificaProd.css' %}">
+    </head>
 {% endblock head %}
+
 <body>
     {% block content %}
         <div>
-            <button class="fakeButton fake1" onclick="window.location.href='{% url 'vetrinaAmministratore' %}'">Torna alla Vetrina</button>
+            <button class="fakeButton fake1" onclick="window.location.href='{% url 'vetrina_amministratore' %}'">Torna alla Vetrina</button>
         </div>
-        <div class="centerPage">
-        <div class="containerModifica">
-    <h1>Modifica prodotto</h1>
 
-        {% if form.errors %}
-            {{ form.errors }}
-        {% endif %}
-        <form class="form-modifica" method="post">
-            {{ form.as_p }}
-            {% csrf_token %}
-            <button type="submit" >Submit</button>
-        </form>
-        </div>
+        <div class="centerPage">
+            <div class="containerModifica">
+                <h1>Modifica prodotto</h1>
+
+                <form class="form-modifica" method="post">
+                    {% csrf_token %}
+                    {{ form_modifica_prodotto.as_p }}
+                    <button type="submit" >Submit</button>
+                </form>
+            </div>
         </div>
     {% endblock content %}
 </body>
+
 </html>

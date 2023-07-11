@@ -2,32 +2,38 @@
 {% load static %}
 
 <!DOCTYPE html>
-<html lang="en">
+<html lang="it">
+
 {% block head %}
-<head>
-    <meta charset="UTF-8">
-    <link rel="stylesheet" href="{% static 'css/ordine.css' %}">
-</head>
+    <head>
+        <meta charset="UTF-8">
+        <title>Ordine</title>
+        <link rel="stylesheet" href="{% static 'css/ordine.css' %}">
+    </head>
 {% endblock head %}
-    <body>
+
+<body>
     {% block content %}
         <h1>Ordine</h1>
+
+        <div>
+            <button class="fakeButton" onclick="window.location.href='{% url 'carrello' %}'">Torna al Carrello</button>
+        </div>
+
         <div class="centerPage">
             <div class="containerOrdine">
+                <form class="form-ordine" method="post">
+                    {% csrf_token %}
 
-                    <form class="form-ordine" method="post">
-                        {% csrf_token %}
-                        {{ form_indirizzo.as_p }}
-                        {{ form_pagamento.as_p }}
-                        <input type="submit" value="Ordina">
-                    </form>
+                    {{ form_indirizzo.as_p }}
+                    {{ form_pagamento.as_p }}
 
+                    <input type="submit" value="Ordina">
+                </form>
             </div>
         </div>
-        <div>
-            <button class="fakeButton" onclick="window.location.href='{% url 'vetrina' %}'">Torna alla Vetrina</button>
-        </div>
-    {% endblock content %}
 
-    </body>
+    {% endblock content %}
+</body>
+
 </html>

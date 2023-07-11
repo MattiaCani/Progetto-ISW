@@ -37,6 +37,7 @@ INSTALLED_APPS = [
     'django.contrib.staticfiles',
     'utente.apps.UtenteConfig',
     'vetrine.apps.VetrineConfig',
+    'prettyjson'
 ]
 
 MIDDLEWARE = [

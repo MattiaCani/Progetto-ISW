@@ -2,29 +2,29 @@
 {% load static %}
 
 <!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    {% block head %}
-    <link rel="stylesheet" href="{% static 'css/signup.css' %}">
-    {% endblock head %}
-    <title>Registrazione</title>
-</head>
+<html lang="it">
+
+{% block head %}
+    <head>
+        <meta charset="UTF-8">
+        <title>Registrazione</title>
+        <link rel="stylesheet" href="{% static 'css/signup.css' %}">
+    </head>
+{% endblock head %}
+
 <body>
-{% block content %}
-    <div class="centerPage">
-        <div class="containerSignup">
-            <h2>Sign Up</h2>
-            {% if form.errors %}
-                {{ form.errors }}
-            {% endif %}
-            <form class="form-signup" method="post">
-                {{ form.as_p }}
-                {% csrf_token %}
-                <button type="submit" >Submit</button>
-            </form>
+    {% block content %}
+        <div class="centerPage">
+            <div class="containerSignup">
+                <h1>Sign Up</h1>
+                <form class="form-signup" method="post">
+                    {% csrf_token %}
+                    {{ form_registrazione.as_p }}
+                    <button type="submit">Submit</button>
+                </form>
+            </div>
         </div>
-    </div>
-{% endblock content %}
+    {% endblock content %}
 </body>
+
 </html>

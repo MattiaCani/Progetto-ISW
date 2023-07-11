@@ -1,14 +1,16 @@
-from json2html import json2html
+import json
+import datetime
+
+from django.core.validators import MinValueValidator
 from django.contrib.auth import authenticate, login, logout
 from django.db import models
 from django.shortcuts import get_object_or_404
-import json
-import datetime
-from vetrine.models import inizializza_vetrine, ResocontoVendite
-from utente.enums import MetodoPagamento
 from django.contrib.auth.models import AbstractUser
 
-from vetrine.models import VetrinaAmministratore, Vetrina, ResocontoVendite
+from vetrine.models import inizializza_vetrine, ResocontoVendite, VetrinaAmministratore, Vetrina, ResocontoVendite
+from utente.enums import MetodoPagamento
+
+from json2html import json2html
 
 
 class Utente(AbstractUser):
@@ -59,7 +61,7 @@ class Prodotto(models.Model):
     codice_seriale = models.IntegerField(unique=True, default=0, primary_key=True)
     tipologia = models.CharField(max_length=30)
     descrizione = models.TextField(default="")
-    prezzo = models.FloatField(default=0.0)
+    prezzo = models.FloatField(default=0.0, validators=[MinValueValidator(0)])
 
     vetrina = models.ForeignKey(Vetrina, on_delete=models.PROTECT, null=True, default="Vetrina")
     resoconto_vendite = models.ForeignKey(ResocontoVendite, on_delete=models.PROTECT, null=True, default="Resoconto")
@@ -72,7 +74,7 @@ class Prodotto(models.Model):
         return str(self.codice_seriale)
 
     @staticmethod
-    def aggiungi_al_carrello(form_quantita, codice_seriale, request):
+    def aggiungi_al_carrello(request, form_quantita, codice_seriale):
         if form_quantita.is_valid():
             quantita_acquisto = form_quantita.cleaned_data['quantita_acquisto']
 
@@ -80,16 +82,15 @@ class Prodotto(models.Model):
             carrello_utente = get_object_or_404(Carrello, possessore=request.user)
 
             try:
-                carrello_utente.lista_prodotti.get(utente=request.user, prodotto=prodotto)
+                carrello_utente.lista_prodotti.get(prodotto=prodotto)
             except ProdottoCarrello.DoesNotExist:
                 prodotto_carrello = ProdottoCarrello.objects.create(utente=request.user, prodotto=prodotto,
                                                                     quantita_acquisto=float(quantita_acquisto))
 
                 carrello_utente.lista_prodotti.add(prodotto_carrello)
 
-                carrello_utente.importo_totale += prodotto.prezzo * float(quantita_acquisto)
-
                 return carrello_utente, prodotto_carrello
+
         return None, None
 
     class Meta:
@@ -99,22 +100,23 @@ class Prodotto(models.Model):
 class ProdottoCarrello(models.Model):
     utente = models.ForeignKey(Utente, on_delete=models.CASCADE, null=True)
     prodotto = models.ForeignKey(Prodotto, on_delete=models.CASCADE, null=True)
-    quantita_acquisto = models.IntegerField(default=1)
+    quantita_acquisto = models.IntegerField(default=1, validators=[MinValueValidator(0)])
+
+    @property
+    def importo_totale_prodotto(self):
+        return self.prodotto.prezzo * self.quantita_acquisto
 
     def __str__(self):
         return str(self.prodotto)
 
     @staticmethod
-    def update_quantita(form_quantita, request, codice_seriale):
+    def update_quantita(request, form_quantita, codice_seriale):
         quantita_acquisto = form_quantita.cleaned_data['quantita_acquisto']
 
         carrello_utente = get_object_or_404(Carrello, possessore=request.user)
-        prodotto_carrello = carrello_utente.lista_prodotti.get(prodotto_id=codice_seriale)
-
-        carrello_utente.importo_totale -= prodotto_carrello.prodotto.prezzo * prodotto_carrello.quantita_acquisto
+        prodotto_carrello = carrello_utente.lista_prodotti.get(prodotto=codice_seriale)
 
         prodotto_carrello.quantita_acquisto = quantita_acquisto
-        carrello_utente.importo_totale += prodotto_carrello.prodotto.prezzo * float(quantita_acquisto)
 
         return prodotto_carrello, carrello_utente
 
@@ -122,11 +124,9 @@ class ProdottoCarrello(models.Model):
     def rimuovi_dal_carrello(request, codice_seriale):
         prodotto = get_object_or_404(Prodotto, pk=codice_seriale)
         carrello_utente = get_object_or_404(Carrello, possessore=request.user)
-        prodotto_carrello = carrello_utente.lista_prodotti.get(utente=request.user, prodotto=prodotto)
 
-        carrello_utente.importo_totale -= prodotto_carrello.prodotto.prezzo * prodotto_carrello.quantita_acquisto
-
-        get_object_or_404(ProdottoCarrello, utente=request.user, prodotto=prodotto).delete()
+        prodotto_carrello = carrello_utente.lista_prodotti.get(prodotto=prodotto)
+        prodotto_carrello.delete()
 
         return carrello_utente
 
@@ -137,7 +137,11 @@ class ProdottoCarrello(models.Model):
 class Carrello(models.Model):
     possessore = models.OneToOneField(Utente, on_delete=models.CASCADE, null=True)
     lista_prodotti = models.ManyToManyField('utente.ProdottoCarrello', blank=True)
-    importo_totale = models.FloatField(default=0.0)
+
+    @property
+    def importo_totale(self):
+        return sum(prodotto_carrello.prodotto.prezzo * prodotto_carrello.quantita_acquisto for prodotto_carrello in
+                   self.lista_prodotti.all())
 
     def __str__(self):
         return self.possessore.username
@@ -160,7 +164,7 @@ class Pagamento(models.Model):
 
 class Ordine(models.Model):
     cliente = models.ForeignKey(Utente, on_delete=models.CASCADE, null=True)
-    carrello = models.JSONField()
+    carrello = models.JSONField(null=True)
 
     numero_ordine = models.PositiveBigIntegerField(unique=True, primary_key=True)
     data_ordine = models.DateTimeField("data ordine")
@@ -173,9 +177,9 @@ class Ordine(models.Model):
 
     @property
     def importo_totale(self):
-        acquisti = json.loads(self.carrello)
-
-        return sum(item['Prezzo'] * item['Quantita'] for item in acquisti)
+        if self.carrello is not None:
+            acquisti = json.loads(self.carrello)
+            return sum(item["Importo totale"] for item in acquisti)
 
     @property
     def stampa_acquisti(self):
@@ -187,7 +191,8 @@ class Ordine(models.Model):
             data.append({
                 "Prodotto": item["Prodotto"],
                 "Prezzo": item["Prezzo"],
-                "Quantita": item["Quantita"]
+                "Quantita": item["Quantita"],
+                "Importo totale": item["Importo totale"]
             })
 
         return json2html.convert(json=data)
@@ -208,14 +213,15 @@ class Ordine(models.Model):
 
         list_carrello = []
 
-        for prodotto in carrello_cliente.lista_prodotti.all():
-            prodotto.prodotto.pezzi_venduti += prodotto.quantita_acquisto
-            prodotto.prodotto.disponibilita -= prodotto.quantita_acquisto
-            prodotto.prodotto.save()
+        for prodotto_carrello in carrello_cliente.lista_prodotti.all():
+            prodotto_carrello.prodotto.pezzi_venduti += prodotto_carrello.quantita_acquisto
+            prodotto_carrello.prodotto.disponibilita -= prodotto_carrello.quantita_acquisto
+            prodotto_carrello.prodotto.save()
 
-            dati_carrello = {"Prodotto": str(prodotto.prodotto.nome),
-                             "Prezzo": prodotto.prodotto.prezzo,
-                             "Quantita": prodotto.quantita_acquisto}
+            dati_carrello = {"Prodotto": str(prodotto_carrello.prodotto.nome),
+                             "Prezzo": prodotto_carrello.prodotto.prezzo,
+                             "Importo totale": prodotto_carrello.importo_totale_prodotto,
+                             "Quantita": prodotto_carrello.quantita_acquisto}
 
             list_carrello.append(dati_carrello)
 
@@ -232,7 +238,6 @@ class Ordine(models.Model):
             nome_metodo=nome_metodo
         )
 
-        carrello_cliente.importo_totale = 0
         carrello_cliente.lista_prodotti.all().delete()
 
         return nuovo_ordine, carrello_cliente

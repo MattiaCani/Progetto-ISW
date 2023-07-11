@@ -2,77 +2,128 @@
 {% load static %}
 
 <!DOCTYPE html>
-<html lang="en">
+<html lang="it">
+
 {% block head %}
-<head>
-    <meta charset="UTF-8">
-    <title>Elenco Ordini</title>
-     <link rel="stylesheet" type="text/css" href="{% static '/css/recontoOrdini.css' %}">
-
-</head>
+    <head>
+        <meta charset="UTF-8">
+        <title>Elenco Ordini</title>
+        <link rel="stylesheet" type="text/css" href="{% static '/css/recontoOrdini.css' %}">
+    </head>
 {% endblock head %}
-<body>
 
+<body>
     {% block content %}
     <div>
-        <button class="fakeButton fake1" onclick="window.location.href='{% url 'vetrinaAmministratore' %}'">Torna alla Vetrina</button>
+        <button class="fakeButton fake1" onclick="window.location.href='{% url 'vetrina_amministratore' %}'">Torna alla Vetrina</button>
     </div>
+
     <div>
-    <h2>Elenco Ordini</h2>
-    <table>
-    <thead>
-        <tr>
-            <th>ID Cliente</th>
-            <th>Email Cliente</th>
-            <th>Nome Cliente</th>
-            <th>Numero Ordine</th>
-            <th>Data Ordine</th>
-            <th>Indirizzo Spedizione</th>
-            <th>Importo Totale</th>
-        </tr>
-        </thead>
-        {% for ordine in ordini %}
-        <tr>
-            <td>{{ ordine.cliente }}</td>
-            <td>{{ ordine.cliente.email }}</td>
-            <td>{{ ordine.cliente.first_name }}</td>
-            <td>{{ ordine.numero_ordine }}</td>
-            <td>{{ ordine.data_ordine }}</td>
-            <td>{{ ordine.indirizzo_spedizione }}</td>
-            <td>{{ ordine.importo_totale }}</td>
-            <td><a href="{% url 'dettaglio_ordine' ordine.numero_ordine %}">Dettagli</a></td>
-        </tr>
-        {% endfor %}
+        <h2>Elenco Ordini</h2>
 
-    </table>
+        <table>
+            <thead>
+                <tr>
+                    <th>ID Cliente</th>
+                    <th>Email Cliente</th>
+                    <th>Nome Cliente</th>
+                    <th>Numero Ordine</th>
+                    <th>Data Ordine</th>
+                    <th>Indirizzo Spedizione</th>
+                    <th>Importo Totale</th>
+                </tr>
+            </thead>
 
-    <br><h3>Vendite Prodotti</h3>
-    <table class="vendite">
-    <thead>
-    <tr>
-        <th>Nome prodotto</th>
-        <th>Tipologia</th>
-        <th>Prezzo</th>
-        <th>Pezzi venduti</th>
-        <th>Totale euro Vendita</th>
-    </tr>
-    </thead>
-    {% for prodotto in prodotti %}
-    <tr>
-        <td>{{ prodotto.nome }}</td>
-        <td>{{ prodotto.tipologia }}</td>
-        <td>{{ prodotto.prezzo }}</td>
-        <td>{{ prodotto.pezzi_venduti }}</td>
-        <td>{{ prodotto.guadagno_totale }}</td>
-    </tr>
-    {% endfor %}
-            <tr id="totale">
-                <td colspan="4">Totale</td>
-                <td>{{ resoconto_vendite.totale_vendite }}€</td>
-        </tr>
-</table>
+            <tbody>
+                {% for ordine in ordini %}
+                    <tr>
+                        <td>{{ ordine.cliente }}</td>
+                        <td>{{ ordine.cliente.email }}</td>
+                        <td>{{ ordine.cliente.first_name }}</td>
+                        <td>{{ ordine.numero_ordine }}</td>
+                        <td>{{ ordine.data_ordine }}</td>
+                        <td>{{ ordine.indirizzo_spedizione }}</td>
+                        <td>{{ ordine.importo_totale }}€</td>
+                        <td><a href="{% url 'dettaglio_ordine' ordine.numero_ordine %}">Dettagli</a></td>
+                    </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+
+    <div>
+        <br>
+        <br>
+        <h1>Vendite Prodotti</h1>
+
+        <div class="centerFiltri">
+            <form class="filtri" method="GET">
+
+                <select name="tipologia">
+                    <option value="" selected>Tutte le tipologie</option>
+                    {% for tipologia in elenco_tipologie %}
+                        <option value="{{ tipologia.tipologia }}" {% if tipologia.tipologia == tipologia_filtrata %} selected {% endif %}>{{ tipologia.tipologia }}</option>
+                    {% endfor %}
+                </select>
+
+                <select name="disponibilita">
+                    <option value="" selected>Qualsiasi disponibilità</option>
+                    {% for disponibilita in elenco_disponibilita %}
+                        <option value="{{ disponibilita }}" {% if disponibilita == disponibilita_filtrata %} selected {% endif %}>{{ disponibilita }}</option>
+                    {% endfor %}
+                </select>
+
+                <input type="number" name="prezzo_min" placeholder="Prezzo minimo" value="{{ request.GET.prezzo_min }}">
+                <input type="number" name="prezzo_max" placeholder="Prezzo massimo" value="{{ request.GET.prezzo_max }}">
+
+                <button type="submit">Filtra</button>
+
+                <a href="?reset_filters=true">Azzeramento filtri</a>
+
+            </form>
         </div>
 
+        <div class="centerSearch">
+            <form class="formSearch" method="GET">
+                <input type="text" name="search_query" placeholder="Cerca prodotti" value="{{ request.GET.search_query }}">
+                <button type="submit">Cerca</button>
+            </form>
+        </div>
+    </div>
+
+    <div>
+        <br>
+        <table class="vendite">
+            <thead>
+                <tr>
+                    <th>Nome prodotto</th>
+                    <th>Tipologia</th>
+                    <th>Prezzo</th>
+                    <th>Pezzi venduti</th>
+                    <th>Totale euro Vendita</th>
+                </tr>
+            </thead>
+
+            <tbody>
+                {% for prodotto in prodotti %}
+                    <tr>
+                        <td>{{ prodotto.nome }}</td>
+                        <td>{{ prodotto.tipologia }}</td>
+                        <td>{{ prodotto.prezzo }}€</td>
+                        <td>{{ prodotto.pezzi_venduti }}</td>
+                        <td>{{ prodotto.guadagno_totale }}€</td>
+                    </tr>
+                {% endfor %}
+
+                <tr id="totale">
+                    <td colspan="4">Totale</td>
+                    <td>{{ resoconto_totale }}€</td>
+                </tr>
+            </tbody>
+        </table>
+
+    </div>
     {% endblock content %}
 </body>
+
 </html>

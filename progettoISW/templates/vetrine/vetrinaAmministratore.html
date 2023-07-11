@@ -1,80 +1,98 @@
 {% extends 'base.html' %}
 {% load static %}
+
 <!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <title>Vetrina Amministratore</title>
-    <link rel="stylesheet" type="text/css" href="{% static '/css/vetrinaAdmin.css' %}">
-</head>
+<html lang="it">
+
+{% block head %}
+    <head>
+        <meta charset="UTF-8">
+        <title>Vetrina Amministratore</title>
+        <link rel="stylesheet" type="text/css" href="{% static '/css/vetrinaAdmin.css' %}">
+    </head>
+{% endblock head %}
 
 <body>
     {% block content %}
     <h1>Amministrazione shop</h1>
 
     <div class="centerFiltri">
-        <!-- Filtri della vetrina -->
         <form class="filtri" method="GET">
+
             <select name="tipologia">
                 <option value="" selected>Tutte le tipologie</option>
-                {% for item in elenco_tipologie %}
-                    <option value="{{ item.tipologia }}" {% if item.tipologia == tipologia_filtrata %} selected {% endif %}>{{ item.tipologia }}</option>
+                {% for tipologia in elenco_tipologie %}
+                    <option value="{{ tipologia.tipologia }}" {% if tipologia.tipologia == tipologia_filtrata %} selected {% endif %}>{{ tipologia.tipologia }}</option>
                 {% endfor %}
             </select>
-            <input type="number" name="disponibilita" placeholder="Filtro per disponibilità" value="{{ request.GET.disponibilita }}">
+
+            <select name="disponibilita">
+                <option value="" selected>Qualsiasi disponibilità</option>
+                {% for disponibilita in elenco_disponibilita %}
+                    <option value="{{ disponibilita }}" {% if disponibilita == disponibilita_filtrata %} selected {% endif %}>{{ disponibilita }}</option>
+                {% endfor %}
+            </select>
+
             <input type="number" name="prezzo_min" placeholder="Prezzo minimo" value="{{ request.GET.prezzo_min }}">
             <input type="number" name="prezzo_max" placeholder="Prezzo massimo" value="{{ request.GET.prezzo_max }}">
+
             <button type="submit">Filtra</button>
+
             <a href="?reset_filters=true">Azzeramento filtri</a>
-          </form>
+
+        </form>
     </div>
+
     <div class="centerSearch">
         <form class="formSearch" method="GET">
             <input type="text" name="search_query" placeholder="Cerca prodotti" value="{{ request.GET.search_query }}">
             <button type="submit">Cerca</button>
         </form>
+
         <div>
             <button class="fakeButton fake1" onclick="window.location.href='{% url 'resoconto_vendite' %}'">Resoconti</button>
         </div>
     </div>
-    {% if elenco_prodotti.count == 0 %}{{ error_message }}{% endif %}
+
     <div class="centerTable">
         <table>
               <thead>
                  <tr>
-                  <td>Nome prodotto</td>
-                  <td>Tipologia</td>
-                  <td>Descrizione</td>
-                  <td>Prezzo</td>
-                  <td>Disponibilità</td>
-                  <td>Azione</td>
-                </tr>
+                     <td>Nome prodotto</td>
+                     <td>Tipologia</td>
+                     <td>Descrizione</td>
+                     <td>Prezzo</td>
+                     <td>Disponibilità</td>
+                     <td>Azione</td>
+                 </tr>
               </thead>
 
               <tbody>
                 {% for item in elenco_prodotti %}
                     <tr>
-                      <td>{{ item.nome }}</td>
-                      <td>{{ item.tipologia }}</td>
-                      <td>{{ item.descrizione }}</td>
-                      <td>{{ item.prezzo }}</td>
-                      <td>{{ item.disponibilita }}</td>
-                      <td>
-                          <div>
-                            <a href="{% url 'rimuovi_prodotto' item.codice_seriale %}">Rimuovi prodotto</a>
-                            <a href="{% url 'modifica_prodotto' item.codice_seriale %}">Modifica prodotto</a>
-                          </div>
-                      </td>
+                        <td>{{ item.nome }}</td>
+                        <td>{{ item.tipologia }}</td>
+                        <td>{{ item.descrizione }}</td>
+                        <td>{{ item.prezzo }}€</td>
+                        <td>{{ item.disponibilita }}</td>
+                        <td>
+                            <div>
+                                <a href="{% url 'rimuovi_prodotto' item.codice_seriale %}">Rimuovi prodotto</a>
+                                <a href="{% url 'modifica_prodotto' item.codice_seriale %}">Modifica prodotto</a>
+                            </div>
+                        </td>
                     </tr>
                 {% endfor %}
               </tbody>
           </table>
     </div>
-            <form class="formAggiungi" action="{% url 'nuovo_prodotto' %}" method="post">
-                {% csrf_token %}
-                <button type="submit">Inserisci Prodotto</button>
-            </form>
+
+    <form class="formAggiungi" action="{% url 'nuovo_prodotto' %}" method="post">
+        {% csrf_token %}
+        <button type="submit">Inserisci Prodotto</button>
+    </form>
     {% endblock content %}
 </body>
+
 </html>
 
