@@ -1,0 +1,105 @@
+body{
+    background-color: #b9b9b9;
+    font-family: Arial, sans-serif;
+    text-align: center;
+}
+
+a {
+    color: #007bff;
+    text-decoration: none;
+}
+
+a:hover {
+    text-decoration: underline;
+}
+
+
+/*column table color alternate*/
+table {
+    border-collapse: collapse;
+    width: 100%;
+}
+thead{
+    background-color: #7d76ff;
+    color: black;
+    border: 2px solid black;
+}
+.vendite thead, table#prodotti_carrello thead{
+    background-color: #9AD1B1;
+}
+th, td {
+    text-align: left;
+    padding: 20px;
+    border: 1px solid black;
+    border-radius: 2px;
+}
+td>div>a{
+    margin: 15px;
+}
+tr:nth-child(even) {
+    background-color: #f2f2f2;
+}
+/*a rule for the last-1 row in a table to change the background color*/
+#totale {
+    background-color: #F9AA60;
+}
+
+#totale td {
+    text-align: center;
+}
+
+/* form e tasto aggiungi prodotto */
+.formAggiungi{
+    display: flex;
+    justify-content: center;
+    padding: 10px;
+}
+
+button{
+    padding: 10px 20px;
+    border: none;
+    cursor: pointer;
+    font-size: 16px;
+    border-radius: 5px;
+}
+
+.formAggiungi button[type="submit"] {
+    background-color: #4CAF50;
+    color: black;
+    border-radius: 5px;
+}
+
+.formAggiungi button[type="submit"]:hover {
+    background-color: #338035;
+    color: white;
+}
+
+.filtri button[type="submit"], .formSearch button[type="submit"] {
+    background-color: #007bff;
+    color: black;
+    border-radius: 5px;
+}
+.filtri button[type="submit"]:hover, .formSearch button[type="submit"]:hover {
+    background-color: #0056b3;
+    color: white;
+}
+.fakeButton {
+    background-color: #F9AA60;
+    color: black;
+    margin-top: 10px;
+    padding: 8px 30px;
+}
+
+.fake1 {
+    position: relative;
+    margin-left: 75%;
+    border-radius: 5px;
+    margin-top: 10px;
+}
+.fakeButton:hover{
+    background-color: #A85B00;
+    color: white;
+}
+
+
+

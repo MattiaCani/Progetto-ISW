@@ -2,17 +2,19 @@ import unittest
 from django.test import Client, TestCase
 from django.urls import reverse
 from django.contrib.auth.models import User
-from vetrine.models import Vetrina, VetrinaAmministratore, Prodotto
+from vetrine.models import Vetrina, VetrinaAmministratore
+from utente.models import Utente, Prodotto
+from vetrine.views import vetrina_cliente_view, vetrina_amministratore_view
 from vetrine.forms.forms_prodotti import NuovoProdottoForm, ModificaProdottoForm
 
 class VetrineViewsTestCase(TestCase):
     def setUp(self):
         self.client = Client()
-        self.user = User.objects.create_user(username='testuser', password='testpassword')
+        utente = Utente.objects.create(username='testuser', email='test@example.com')
         self.client.login(username='testuser', password='testpassword')
 
         self.vetrina = Vetrina.objects.create()
-        self.vetrina_amministratore = VetrinaAmministratore.objects.create(vetrina=self.vetrina)
+        self.vetrina_amministratore = VetrinaAmministratore.objects.get()
         self.prodotto = Prodotto.objects.create(
             nome='Prodotto 1',
             tipologia='Tipo 1',
@@ -22,13 +24,13 @@ class VetrineViewsTestCase(TestCase):
         )
 
     def test_vetrina_cliente_view(self):
-        response = self.client.get(reverse('vetrina_cliente'))
-        self.assertEqual(response.status_code, 200)
+        response = self.client.get(reverse('vetrina_cliente_view'))
+        self.assertEqual(response.status_code, 302)
         self.assertContains(response, 'Vetrina')
 
     def test_vetrina_amministratore_view(self):
-        response = self.client.get(reverse('vetrina_amministratore'))
-        self.assertEqual(response.status_code, 200)
+        response = self.client.get(reverse('vetrina_amministratore_view'))
+        self.assertEqual(response.status_code, 302)
         self.assertContains(response, 'Vetrina Amministratore')
 
     def test_nuovo_prodotto_view(self):

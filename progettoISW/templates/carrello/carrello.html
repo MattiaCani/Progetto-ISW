@@ -9,10 +9,9 @@
 <body>
     {% block content %}
     <div>
-        <h1>Carrello</h1>
-        <button class="fakeButton fake1" onclick="window.location.href='{% url 'vetrina' %}'">Torna alla Vetrina</button>
+        <button id="toVetrina" class="fakeButton fake1" onclick="window.location.href='{% url 'vetrina' %}'">Torna alla Vetrina</button>
     </div>
-
+    <h1>Carrello</h1>
     <table id="prodotti_carrello">
         <thead>
             <tr>

@@ -20,8 +20,12 @@
                 <form class="form-signup" method="post">
                     {% csrf_token %}
                     {{ form_registrazione.as_p }}
+
+
+
                     <button type="submit">Submit</button>
                 </form>
+                <p>Sei già registrato? <a href="{% url 'login' %}">Accedi!</a></p>
             </div>
         </div>
     {% endblock content %}

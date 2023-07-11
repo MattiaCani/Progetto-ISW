@@ -1,0 +1,77 @@
+body {
+    background-color: #b9b9b9;
+    font-family: Arial, sans-serif;
+    text-align: center;
+}
+.centerPage {
+    display: flex;
+    align-items: center;
+    border-radius: 5px;
+    flex-direction: column;
+    justify-content: center;
+}
+div.containerModifica {
+    width: 370px;
+    background-color: white;
+    margin: auto;
+    padding: 10px 10px 30px 10px;
+    border-radius: 5px;
+    flex-direction: column;
+}
+
+.form-modifica {
+    display: flex;
+    justify-content: center;
+    flex-direction: column;
+    align-items: center;
+}
+
+.form-modifica input[type="text"], .form-modifica input[type="password"], .form-modifica input[type="number"] {
+    border-radius: 5px;
+    border: 1px solid #ccc;
+    padding: 8px;
+
+}
+.form-modifica input[type="submit"] {
+    border-radius: 5px;
+    border: 1px solid #ccc;
+    margin: 25px 0px 10px 0px;
+    padding: 10px 55px;
+    background-color: #007bff;
+    color: white;
+    font-weight: bold;
+}
+.form-modifica input[type="submit"]:hover {
+    background-color: #0069d9;
+    color: white;
+}
+.form-modifica button {
+    background-color: #4CAF50;
+    color: black;
+    border-radius: 5px;
+    padding: 8px 45px;
+    margin-top: 25px;
+}
+
+.form-modifica button:hover{
+    background-color: #338035;
+    color: white;
+    border-radius: 5px;
+}
+
+.fakeButton {
+    background-color: #F9AA60;
+    color: black;
+    margin-top: 10px;
+    padding: 8px 30px;
+}
+
+.fake1 {
+    position: fixed;
+    margin-left: 310px;
+    border-radius: 5px;
+}
+.fakeButton:hover{
+    background-color: #A85B00;
+    color: white;
+}

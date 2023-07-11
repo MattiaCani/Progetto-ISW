@@ -9,6 +9,7 @@
         <meta charset="UTF-8">
         <title>Elenco Ordini</title>
         <link rel="stylesheet" type="text/css" href="{% static '/css/recontoOrdini.css' %}">
+        <link rel="stylesheet" type="text/css" href="{% static '/css/vetrinaAdmin.css' %}">
     </head>
 {% endblock head %}
 
@@ -57,38 +58,40 @@
         <h1>Vendite Prodotti</h1>
 
         <div class="centerFiltri">
-            <form class="filtri" method="GET">
+        <form class="filtri" method="GET">
 
-                <select name="tipologia">
-                    <option value="" selected>Tutte le tipologie</option>
-                    {% for tipologia in elenco_tipologie %}
-                        <option value="{{ tipologia.tipologia }}" {% if tipologia.tipologia == tipologia_filtrata %} selected {% endif %}>{{ tipologia.tipologia }}</option>
-                    {% endfor %}
-                </select>
+            <select name="tipologia">
+                <option value="" selected="">Tutte le tipologie</option>
 
-                <select name="disponibilita">
-                    <option value="" selected>Qualsiasi disponibilità</option>
-                    {% for disponibilita in elenco_disponibilita %}
-                        <option value="{{ disponibilita }}" {% if disponibilita == disponibilita_filtrata %} selected {% endif %}>{{ disponibilita }}</option>
-                    {% endfor %}
-                </select>
+                    <option value="Videogioco">Videogioco</option>
 
-                <input type="number" name="prezzo_min" placeholder="Prezzo minimo" value="{{ request.GET.prezzo_min }}">
-                <input type="number" name="prezzo_max" placeholder="Prezzo massimo" value="{{ request.GET.prezzo_max }}">
+                    <option value="Verdura">Verdura</option>
 
-                <button type="submit">Filtra</button>
+                    <option value="Test">Test</option>
 
-                <a href="?reset_filters=true">Azzeramento filtri</a>
+                    <option value="Tecnologia">Tecnologia</option>
 
-            </form>
-        </div>
+            </select>
 
-        <div class="centerSearch">
-            <form class="formSearch" method="GET">
-                <input type="text" name="search_query" placeholder="Cerca prodotti" value="{{ request.GET.search_query }}">
-                <button type="submit">Cerca</button>
-            </form>
-        </div>
+            <select name="disponibilita">
+                <option value="" selected="">Qualsiasi disponibilità</option>
+
+                    <option value="Ultime scorte">Ultime scorte</option>
+
+                    <option value="Disponibile">Disponibile</option>
+
+                    <option value="Illimitata">Illimitata</option>
+
+            </select>
+
+            <input type="number" name="prezzo_min" placeholder="Prezzo minimo" value="">
+            <input type="number" name="prezzo_max" placeholder="Prezzo massimo" value="">
+
+            <button type="submit">Filtra</button>
+
+            <a href="?reset_filters=true">Azzeramento filtri</a>
+
+        </form>
     </div>
 
     <div>

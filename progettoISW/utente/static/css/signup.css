@@ -12,7 +12,6 @@ body {
     text-align: center;
 }
 div.containerSignup {
-    width: 300px;
     background-color: white;
     margin: auto;
     padding: 10px 10px 30px 10px;
@@ -22,7 +21,6 @@ div.containerSignup {
 .centerPage {
     display: flex;
     align-items: center;
-    height: 80vh;
     border-radius: 5px;
     flex-direction: column;
     justify-content: center;
@@ -40,10 +38,23 @@ div.containerSignup {
     padding: 8px;
 
 }
+form.form-signup>ul{
+    margin: 0px;
+}
+span.helptext{
+    display: flex;
+    padding: 15px 5px 0px 5px;
+}
+form.form-signup>ul {
+    background-color: #00800029;
+    padding: 30px;
+    border-radius: 5px;
+}
+
 .form-signup button {
     border-radius: 5px;
     border: 1px solid #ccc;
-    margin: 25px 0px 10px 0px;
+    margin: 25px 0px 25px 0px;
     padding: 10px 55px;
     background-color: #007bff;
     color: white;

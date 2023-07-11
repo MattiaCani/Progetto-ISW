@@ -90,13 +90,9 @@ td>div>a{
 tr:nth-child(even) {
     background-color: #f2f2f2;
 }
-
-#totale {
+/*a rule for the last-1 row in a table to change the background color*/
+tr#totale:nth-last-child(2) {
     background-color: #F9AA60;
-}
-
-#totale td {
-    text-align: center;
 }
 
 /* form e tasto aggiungi prodotto */
@@ -113,7 +109,6 @@ button {
     font-size: 16px;
     margin-top: 10px;
     border-radius: 5px;
-    background: palegreen;
 }
 
 .formAggiungi button[type="submit"] {
@@ -145,12 +140,19 @@ button {
 
 .fake1 {
     position: relative;
-    margin-left: 55%;
+    /*margin-left: 55%;*/
     border-radius: 5px;
     margin-top: 10px;
+}
+button#resoconto{
+    margin-left: 55%;
+}
+button#toVetrina{
+    margin-left: 70%;
 }
 .fakeButton:hover{
     background-color: #A85B00;
     color: white;
 }
+
 
