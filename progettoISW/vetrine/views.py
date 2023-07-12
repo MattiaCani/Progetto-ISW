@@ -109,16 +109,9 @@ def resoconto_vendite_view(request):
 
     resoconto_vendite = get_object_or_404(ResocontoVendite)
 
-    elenco_prodotti = resoconto_vendite.prodotto_set.all()
-
-    elenco_tipologie = elenco_prodotti.values('tipologia').distinct()
-    elenco_disponibilita = ['Ultime scorte', 'Disponibile', 'Illimitata']
-
-    disponibilita, tipologia, elenco_prodotti = Vetrina.aggiungi_filtro(request, elenco_prodotti)
-    elenco_prodotti = Vetrina.ricerca_prodotto(request, elenco_prodotti)
-    elenco_prodotti = Vetrina.azzera_filtri(request, elenco_prodotti)
-
-    boh = sum(prodotto.guadagno_totale for prodotto in elenco_prodotti)
+    dati = ResocontoVendite.get_dati_resoconto(request, resoconto_vendite)
+    # unpacking della tupla di ritorno
+    elenco_prodotti, elenco_tipologie, elenco_disponibilita, tipologia, disponibilita, tot = dati
 
     context = {
         'ordini': ordini,
@@ -128,7 +121,7 @@ def resoconto_vendite_view(request):
         'elenco_disponibilita': elenco_disponibilita,
         'tipologia_filtrata': tipologia,
         'disponibilita_filtrata': disponibilita,
-        'resoconto_totale': boh
+        'resoconto_totale': tot
     }
 
     return render(request, 'vetrine/resocontoVendite.html', context)

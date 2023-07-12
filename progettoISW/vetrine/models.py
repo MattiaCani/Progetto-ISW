@@ -14,6 +14,30 @@ class ResocontoVendite(models.Model):
     def __str__(self):
         return self.ID_resoconto
 
+    @staticmethod
+    def get_dati_resoconto(request, resoconto_vendite):
+        elenco_prodotti = resoconto_vendite.prodotto_set.all()
+
+        elenco_tipologie = elenco_prodotti.values('tipologia').distinct()
+        elenco_disponibilita = ['Ultime scorte', 'Disponibile', 'Illimitata']
+
+        disponibilita, tipologia, elenco_prodotti = Vetrina.aggiungi_filtro(request, elenco_prodotti)
+        elenco_prodotti = Vetrina.ricerca_prodotto(request, elenco_prodotti)
+        elenco_prodotti = Vetrina.azzera_filtri(request, elenco_prodotti)
+
+        tot = sum(prodotto.guadagno_totale for prodotto in elenco_prodotti)
+
+        dati_resoconto = (
+            elenco_prodotti,
+            elenco_tipologie,
+            elenco_disponibilita,
+            tipologia,
+            disponibilita,
+            tot
+        )
+
+        return dati_resoconto
+
     class Meta:
         verbose_name_plural = "Resoconti"
 
