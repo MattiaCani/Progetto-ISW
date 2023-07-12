@@ -3,80 +3,81 @@ from django.test import Client, TestCase
 from django.urls import reverse
 from django.contrib.auth.models import User
 from vetrine.models import Vetrina, VetrinaAmministratore
-from utente.models import Utente, Prodotto
+from utente.models import Utente, Prodotto, inizializza_vetrine
 from vetrine.views import vetrina_cliente_view, vetrina_amministratore_view
 from vetrine.forms.forms_prodotti import NuovoProdottoForm, ModificaProdottoForm
 
-class VetrineViewsTestCase(TestCase):
+class ViewTestCase(TestCase):
     def setUp(self):
         self.client = Client()
-        utente = Utente.objects.create(username='testuser', email='test@example.com')
-        self.client.login(username='testuser', password='testpassword')
-
-        self.vetrina = Vetrina.objects.create()
-        self.vetrina_amministratore = VetrinaAmministratore.objects.get()
+        self.user = Utente.objects.create(username='testuser', email='test@example.com')
+        self.vetrina, _ = Vetrina.objects.get_or_create(ID_vetrina='Test Vetrina')
         self.prodotto = Prodotto.objects.create(
-            nome='Prodotto 1',
-            tipologia='Tipo 1',
-            descrizione='Descrizione del prodotto 1',
+            nome='Test Prodotto',
+            codice_seriale=1,
+            tipologia='Test Tipologia',
+            descrizione='Test Descrizione',
             prezzo=10.0,
-            disponibilita=True
+            vetrina= self.vetrina
         )
 
     def test_vetrina_cliente_view(self):
-        response = self.client.get(reverse('vetrina_cliente_view'))
-        self.assertEqual(response.status_code, 302)
-        self.assertContains(response, 'Vetrina')
+        self.client.login(username='testuser', email='test@example.com')
+        response = self.client.get(reverse('vetrina'))
+        self.assertEqual(response.status_code, 200)
+        self.assertContains(response, 'Test Prodotto')
 
     def test_vetrina_amministratore_view(self):
-        response = self.client.get(reverse('vetrina_amministratore_view'))
-        self.assertEqual(response.status_code, 302)
-        self.assertContains(response, 'Vetrina Amministratore')
+        self.client.login(username='testuser', email='test@example.com')
+        response = self.client.get(reverse('vetrina_amministratore'))
+        self.assertEqual(response.status_code, 200)
+        self.assertContains(response, 'Test Prodotto')
 
     def test_nuovo_prodotto_view(self):
-        response = self.client.get(reverse('nuovo_prodotto'))
-        self.assertEqual(response.status_code, 200)
-
+        self.client.login(username='testuser', email='test@example.com')
         response = self.client.post(reverse('nuovo_prodotto'), {
-            'nome': 'Nuovo prodotto',
-            'tipologia': 'Tipo 2',
-            'descrizione': 'Descrizione del nuovo prodotto',
+            'nome': 'Nuovo Prodotto',
+            'codice_seriale': 2,
+            'tipologia': 'Nuova Tipologia',
+            'descrizione': 'Nuova Descrizione',
             'prezzo': 20.0,
-            'disponibilita': True
+            'vetrina': self.vetrina
         })
         self.assertEqual(response.status_code, 302)
-        self.assertRedirects(response, reverse('vetrina_amministratore'))
-
-        nuovo_prodotto = Prodotto.objects.filter(nome='Nuovo prodotto').first()
-        self.assertIsNotNone(nuovo_prodotto)
+        self.assertEqual(Prodotto.objects.count(), 2)
 
     def test_rimuovi_prodotto_view(self):
+        self.client.login(username='testuser', email='test@example.com')
         response = self.client.get(reverse('rimuovi_prodotto', args=[self.prodotto.codice_seriale]))
         self.assertEqual(response.status_code, 302)
-        self.assertRedirects(response, reverse('vetrina_amministratore'))
-
-        prodotto = Prodotto.objects.filter(codice_seriale=self.prodotto.codice_seriale).first()
-        self.assertIsNone(prodotto)
+        self.assertEqual(Prodotto.objects.count(), 0)
 
     def test_modifica_prodotto_view(self):
-        response = self.client.get(reverse('modifica_prodotto', args=[self.prodotto.codice_seriale]))
-        self.assertEqual(response.status_code, 200)
-
+        self.client.login(username='testuser', email='test@example.com')
         response = self.client.post(reverse('modifica_prodotto', args=[self.prodotto.codice_seriale]), {
-            'nome': 'Prodotto modificato',
-            'tipologia': 'Tipo modificato',
-            'descrizione': 'Descrizione del prodotto modificato',
-            'prezzo': 15.0,
-            'disponibilita': False
+            'nome': 'Modifica Prodotto',
+            'codice_seriale': self.prodotto.codice_seriale,
+            'tipologia': 'Modifica Tipologia',
+            'descrizione': 'Modifica Descrizione',
+            'prezzo': 30.0,
+            'vetrina': self.vetrina
         })
         self.assertEqual(response.status_code, 302)
-        self.assertRedirects(response, reverse('vetrina_amministratore'))
+        self.prodotto.refresh_from_db()
+        self.assertEqual(self.prodotto.nome, 'Modifica Prodotto')
+        self.assertEqual(self.prodotto.prezzo, 30.0)
 
-        prodotto_modificato = Prodotto.objects.filter(nome='Prodotto modificato').first()
-        self.assertIsNotNone(prodotto_modificato)
-        self.assertEqual(prodotto_modificato.tipologia, 'Tipo modificato')
-        self.assertEqual(prodotto_modificato.prezzo, 15.0)
-        self.assertFalse(prodotto_modificato.disponibilita)
+    def test_resoconto_vendite_view(self):
+        self.client.login(username='testuser', email='test@example.com')
+        response = self.client.get(reverse('resoconto_vendite'))
+        self.assertEqual(response.status_code, 200)
+        self.assertContains(response, 'Test Prodotto')
+
+    def test_dettaglio_ordine_view(self):
+        ordine = self.user.ordine_set.create(numero_ordine=1, data_ordine='2021-01-01', numero_carta=1234567890)
+        response = self.client.get(reverse('dettaglio_ordine',  args=[self.prodotto.codice_seriale]))
+        self.assertEqual(response.status_code, 302)
+
 
 if __name__ == '__main__':
     unittest.main()
