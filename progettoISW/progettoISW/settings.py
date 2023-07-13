@@ -140,5 +140,6 @@ DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 LOGIN_REDIRECT_URL = "/"
 
 TESTS = [
-    'tests',
+    'test_unitari',
+    'test_accettazione',
 ]

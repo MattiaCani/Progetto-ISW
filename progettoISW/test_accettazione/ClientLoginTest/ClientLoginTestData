@@ -1,0 +1,6 @@
+{"username": "Mario25", "password": "palle9H1", "test": "log_success"}
+{"username": "Luigi88", "password": "pavimento9H1", "test": "log_success"}
+{"username": "Mario21", "password": "palle9H1", "test": "log_username_failure"}
+{"username": "Luigi", "password": "pavimento9H1", "test": "log_username_failure"}
+{"username": "Mario25", "password": "palle", "test": "log_pass_failure"}
+{"username": "Luigi88", "password": "pavimento9H1gterdg", "test": "log_pass_failure"}

@@ -1,0 +1,6 @@
+{"username": "admin", "password": "admin", "test": "log_success"}
+{"username": "unica", "password": "unica", "test": "log_success"}
+{"username": "adminik", "password": "admin", "test": "log_username_failure"}
+{"username": "unical", "password": "unica", "test": "log_username_failure"}
+{"username": "admin", "password": "adminalkfj", "test": "log_pass_failure"}
+{"username": "unica", "password": "unicap", "test": "log_pass_failure"}
