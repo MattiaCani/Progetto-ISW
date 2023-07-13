@@ -7,7 +7,7 @@
 {% block head %}
     <head>
         <meta charset="UTF-8">
-        <title>Elenco Ordini</title>
+        <title>Resoconto Vendite</title>
         <link rel="stylesheet" type="text/css" href="{% static '/css/recontoOrdini.css' %}">
         <link rel="stylesheet" type="text/css" href="{% static '/css/vetrinaAdmin.css' %}">
     </head>
@@ -58,41 +58,38 @@
         <h1>Vendite Prodotti</h1>
 
         <div class="centerFiltri">
-        <form class="filtri" method="GET">
+            <form name="form_filtri" class="filtri" method="GET">
 
-            <select name="tipologia">
-                <option value="" selected="">Tutte le tipologie</option>
+                <select name="tipologia">
+                    <option value="" selected>Tutte le tipologie</option>
+                    {% for tipologia in elenco_tipologie %}
+                        <option value="{{ tipologia.tipologia }}" {% if tipologia.tipologia == tipologia_filtrata %} selected {% endif %}>{{ tipologia.tipologia }}</option>
+                    {% endfor %}
+                </select>
 
-                    <option value="Videogioco">Videogioco</option>
+                <select name="disponibilita">
+                    <option value="" selected>Qualsiasi disponibilità</option>
+                    {% for disponibilita in elenco_disponibilita %}
+                        <option value="{{ disponibilita }}" {% if disponibilita == disponibilita_filtrata %} selected {% endif %}>{{ disponibilita }}</option>
+                    {% endfor %}
+                </select>
 
-                    <option value="Verdura">Verdura</option>
+                <input type="number" name="prezzo_min" placeholder="Prezzo minimo" value="{{ request.GET.prezzo_min }}">
+                <input type="number" name="prezzo_max" placeholder="Prezzo massimo" value="{{ request.GET.prezzo_max }}">
 
-                    <option value="Test">Test</option>
+                <button id="filter_button" type="submit">Filtra</button>
 
-                    <option value="Tecnologia">Tecnologia</option>
+                <a href="?reset_filters=true">Azzeramento filtri</a>
 
-            </select>
+            </form>
+        </div>
 
-            <select name="disponibilita">
-                <option value="" selected="">Qualsiasi disponibilità</option>
-
-                    <option value="Ultime scorte">Ultime scorte</option>
-
-                    <option value="Disponibile">Disponibile</option>
-
-                    <option value="Illimitata">Illimitata</option>
-
-            </select>
-
-            <input type="number" name="prezzo_min" placeholder="Prezzo minimo" value="">
-            <input type="number" name="prezzo_max" placeholder="Prezzo massimo" value="">
-
-            <button type="submit">Filtra</button>
-
-            <a href="?reset_filters=true">Azzeramento filtri</a>
-
-        </form>
-    </div>
+        <div class="centerSearch">
+            <form class="formSearch" method="GET">
+                <input type="text" name="search_query" placeholder="Cerca prodotti" value="{{ request.GET.search_query }}">
+                <button type="submit">Cerca</button>
+            </form>
+        </div>
 
     <div>
         <br>
@@ -109,10 +106,10 @@
 
             <tbody>
                 {% for prodotto in prodotti %}
-                    <tr>
-                        <td>{{ prodotto.nome }}</td>
-                        <td>{{ prodotto.tipologia }}</td>
-                        <td>{{ prodotto.prezzo }}€</td>
+                    <tr class="shop_product">
+                        <td class="shop_nome">{{ prodotto.nome }}</td>
+                        <td class="shop_tipologia">{{ prodotto.tipologia }}</td>
+                        <td class="shop_prezzo">{{ prodotto.prezzo }}€</td>
                         <td>{{ prodotto.pezzi_venduti }}</td>
                         <td>{{ prodotto.guadagno_totale }}€</td>
                     </tr>
@@ -124,7 +121,7 @@
                 </tr>
             </tbody>
         </table>
-
+    </div>
     </div>
     {% endblock content %}
 </body>

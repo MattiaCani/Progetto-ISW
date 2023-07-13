@@ -23,7 +23,7 @@
         <h1>Visiona il nostro shop!</h1>
 
         <div class="centerFiltri">
-        <form class="filtri" method="GET">
+        <form name="form_filtri" class="filtri" method="GET">
 
             <select name="tipologia">
                 <option value="" selected>Tutte le tipologie</option>
@@ -42,7 +42,7 @@
             <input type="number" name="prezzo_min" placeholder="Prezzo minimo" value="{{ request.GET.prezzo_min }}">
             <input type="number" name="prezzo_max" placeholder="Prezzo massimo" value="{{ request.GET.prezzo_max }}">
 
-            <button type="submit">Filtra</button>
+            <button id="filter_button" type="submit">Filtra</button>
 
             <a href="?reset_filters=true">Azzeramento filtri</a>
 
@@ -52,7 +52,7 @@
         <div class="centerSearch">
         <form class="formSearch" method="GET">
             <input type="text" name="search_query" placeholder="Cerca prodotti" value="{{ request.GET.search_query }}">
-            <button type="submit">Cerca</button>
+            <button id="search_button" type="submit">Cerca</button>
         </form>
     </div>
 
@@ -73,18 +73,18 @@
                 {% for item in elenco_prodotti %}
                     <form action="{%  url 'aggiungi_al_carrello' item.codice_seriale %}" method="POST">
                         {% csrf_token %}
-                        <tr id="{{ item.codice_seriale }}">
-                            <td>{{ item.nome }}</td>
-                            <td>{{ item.tipologia }}</td>
+                        <tr class="shop_product" id="{{ item.nome }}">
+                            <td class="shop_nome">{{ item.nome }}</td>
+                            <td class="shop_tipologia">{{ item.tipologia }}</td>
                             <td>{{ item.descrizione }}</td>
-                            <td>{{ item.prezzo }}€</td>
+                            <td class="shop_prezzo">{{ item.prezzo }}€</td>
                             <td>
                                 <label for="quantita_acquisto">
                                     {{ form_quantita.as_div }}
                                 </label>
                             </td>
                             <td>
-                                <button type="submit" {% if item in carrello %} disabled {% endif %}>{% if item not in carrello %}Aggiungi al carrello{% else %}Già nel carrello{% endif %}</button>
+                                <button name="add_product" type="submit" {% if item in carrello %} disabled {% endif %}>{% if item not in carrello %}Aggiungi al carrello{% else %}Già nel carrello{% endif %}</button>
                             </td>
                         </tr>
                     </form>
@@ -93,7 +93,7 @@
           </table>
         </div>
         <div>
-            <button class="fakeButton" onclick="window.location.href='{% url 'carrello' %}'">Apri carrello</button>
+            <button class="fakeButton" id="cart_button" onclick="window.location.href='{% url 'carrello' %}'">Apri carrello</button>
         </div>
     {% endblock content %}
 </body>

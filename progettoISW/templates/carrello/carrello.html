@@ -25,10 +25,10 @@
 
         <tbody>
             {% for prodotto_carrello, form_quantita in carrello %}
-                <form action="{%  url 'update_quantita' prodotto_carrello.prodotto.codice_seriale %}" method="POST">
+                <form id="form_quantita" action="{%  url 'update_quantita' prodotto_carrello.prodotto.codice_seriale %}" method="POST">
                     {% csrf_token %}
-                    <tr id="{{ prodotto_carrello.prodotto.codice_seriale }}">
-                        <td>{{ prodotto_carrello.prodotto.nome }}</td>
+                    <tr class="cart_product" id="{{ prodotto_carrello.prodotto.nome }}">
+                        <td class="cart_nome">{{ prodotto_carrello.prodotto.nome }}</td>
                         <td>{{ prodotto_carrello.prodotto.tipologia }}</td>
                         <td>
                             <label for="quantita_acquisto">
@@ -38,7 +38,7 @@
                         <td>
                             <a href="{% url 'rimuovi_dal_carrello' prodotto_carrello.prodotto.codice_seriale %}">Rimuovi</a>
                         </td>
-                        <td>{{ prodotto_carrello.importo_totale_prodotto }}€ ({{ prodotto_carrello.prodotto.prezzo }} al pz.)</td>
+                        <td class="cart_prezzo">{{ prodotto_carrello.importo_totale_prodotto }}€ ({{ prodotto_carrello.prodotto.prezzo }} al pz.)</td>
                     </tr>
                 </form>
             {% endfor %}

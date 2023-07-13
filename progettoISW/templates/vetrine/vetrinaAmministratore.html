@@ -69,12 +69,12 @@
 
               <tbody>
                 {% for item in elenco_prodotti %}
-                    <tr>
-                        <td>{{ item.nome }}</td>
-                        <td>{{ item.tipologia }}</td>
-                        <td>{{ item.descrizione }}</td>
-                        <td>{{ item.prezzo }}€</td>
-                        <td>{{ item.disponibilita }}</td>
+                    <tr class="admin_product" id="{{ item.nome }}">
+                        <td class="admin_product_nome">{{ item.nome }}</td>
+                        <td class="admin_product_tipologia">{{ item.tipologia }}</td>
+                        <td class="admin_product_descrizione">{{ item.descrizione }}</td>
+                        <td class="admin_product_prezzo">{{ item.prezzo }}€</td>
+                        <td class="admin_product_disponibilita">{{ item.disponibilita }}</td>
                         <td>
                             <div>
                                 <a href="{% url 'rimuovi_prodotto' item.codice_seriale %}">Rimuovi prodotto</a>
@@ -89,7 +89,7 @@
 
     <form class="formAggiungi" action="{% url 'nuovo_prodotto' %}" method="post">
         {% csrf_token %}
-        <button type="submit">Inserisci Prodotto</button>
+        <button id="insert_button" type="submit">Inserisci Prodotto</button>
     </form>
     {% endblock content %}
 </body>

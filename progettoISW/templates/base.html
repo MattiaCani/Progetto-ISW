@@ -13,7 +13,7 @@
     <body>
           {% block content %}{% endblock content %}
           {% if user.is_authenticated %}
-                <p>Sei loggato come <b>{{ request.user }}</b>. Clicca qui per il <a href="{% url 'logout' %}">log out</a></p>
+                <p>Sei loggato come <b id="logged_user">{{ request.user }}</b>. Clicca qui per il <a id="logout_button" href="{% url 'logout' %}">log out</a></p>
           {% endif %}
     </body>
 </html>

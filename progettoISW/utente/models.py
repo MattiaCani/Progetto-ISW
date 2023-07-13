@@ -164,7 +164,7 @@ class Pagamento(models.Model):
 
 class Ordine(models.Model):
     cliente = models.ForeignKey(Utente, on_delete=models.CASCADE, null=True)
-    carrello = models.JSONField(null=True)
+    carrello = models.JSONField()
 
     numero_ordine = models.PositiveBigIntegerField(unique=True, primary_key=True)
     data_ordine = models.DateTimeField("data ordine")
