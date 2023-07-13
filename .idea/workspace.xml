@@ -1,11 +1,16 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project version="4">
   <component name="ChangeListManager">
-    <list default="true" id="dce72eed-ca4d-49b9-99f5-1d8c45fecc77" name="Changes" comment="" />
+    <list default="true" id="dce72eed-ca4d-49b9-99f5-1d8c45fecc77" name="Changes" comment="">
+      <change beforePath="$PROJECT_DIR$/progettoISW/test_unitari/test_views_vetrine.py" beforeDir="false" afterPath="$PROJECT_DIR$/progettoISW/test_unitari/test_views_vetrine.py" afterDir="false" />
+    </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
     <option name="HIGHLIGHT_NON_ACTIVE_CHANGELIST" value="false" />
     <option name="LAST_RESOLUTION" value="IGNORE" />
+  </component>
+  <component name="Git.Settings">
+    <option name="RECENT_GIT_ROOT_PATH" value="$PROJECT_DIR$" />
   </component>
   <component name="MarkdownSettingsMigration">
     <option name="stateVersion" value="1" />
@@ -17,8 +22,10 @@
   </component>
   <component name="PropertiesComponent"><![CDATA[{
   "keyToString": {
+    "RunOnceActivity.OpenProjectViewOnStart": "true",
     "RunOnceActivity.ShowReadmeOnStart": "true",
     "WebServerToolWindowFactoryState": "false",
+    "git-widget-placeholder": "main",
     "last_opened_file_path": "C:/Users/fepla/Desktop/GitKraken/a/Progetto-ISW",
     "vue.rearranger.settings.migration": "true"
   }
@@ -32,6 +39,7 @@
       <option name="presentableId" value="Default" />
       <updated>1689215687535</updated>
       <workItem from="1689215688733" duration="3000" />
+      <workItem from="1689249194835" duration="180000" />
     </task>
     <servers />
   </component>
