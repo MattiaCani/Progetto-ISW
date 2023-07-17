@@ -2,8 +2,8 @@ from selenium.webdriver.common.by import By
 from selenium.webdriver.support.select import Select
 
 
-def get_cart_products(driver):
-    driver.get("http://127.0.0.1:8000/carrello/")
+def get_cart_products(self, driver):
+    driver.get(f"{self.live_server_url}/carrello/")
     products = driver.find_elements(By.CLASS_NAME, "cart_product")
 
     list_products = []
@@ -31,8 +31,8 @@ def compile_order(driver):
     select.select_by_visible_text("Debito")
 
 
-def confirm_order(driver, carrello):
-    driver.get("http://127.0.0.1:8000/ordine/")
+def confirm_order(self, driver, carrello):
+    driver.get(f"{self.live_server_url}/ordine/")
     current_logged_user = driver.get_cookie("sessionid")
 
     compile_order(driver)
@@ -46,15 +46,15 @@ def confirm_order(driver, carrello):
     assert title == "Vetrina"
     assert current_logged_user == logged_user
 
-    driver.get("http://127.0.0.1:8000/carrello/")
-    nuovo_carrello = get_cart_products(driver)
+    driver.get(f"{self.live_server_url}/carrello/")
+    nuovo_carrello = get_cart_products(self, driver)
 
     assert carrello != nuovo_carrello
     assert len(nuovo_carrello) == 0
 
 
-def cancel_order(driver, carrello):
-    driver.get("http://127.0.0.1:8000/ordine/")
+def cancel_order(self, driver, carrello):
+    driver.get(f"{self.live_server_url}/ordine/")
     current_logged_user = driver.get_cookie("sessionid")
 
     compile_order(driver)
@@ -68,8 +68,8 @@ def cancel_order(driver, carrello):
     assert title == "Carrello"
     assert current_logged_user == logged_user
 
-    driver.get("http://127.0.0.1:8000/carrello/")
-    nuovo_carrello = get_cart_products(driver)
+    driver.get(f"{self.live_server_url}/carrello/")
+    nuovo_carrello = get_cart_products(self, driver)
 
     assert carrello == nuovo_carrello
     assert len(nuovo_carrello) > 0

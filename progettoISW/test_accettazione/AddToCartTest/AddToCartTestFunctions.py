@@ -6,7 +6,7 @@ from selenium.webdriver.support.select import Select
 from test_accettazione.CheckoutTest import CheckoutTestFunctions
 
 
-def add_new_product(driver, product_name, quantita):
+def add_new_product(self, driver, product_name, quantita):
     product = driver.find_element(By.ID, product_name)
 
     select_quantita = Select(product.find_element(By.ID, "id_quantita_acquisto"))
@@ -35,8 +35,7 @@ def add_new_product(driver, product_name, quantita):
     assert product is not None
     assert quantita_aggiunta == quantita
 
-    driver.get("http://127.0.0.1:8000/vetrina/")
-
+    driver.get(f"{self.live_server_url}/vetrina/")
 
 
 def add_product(driver, product_name):
@@ -55,24 +54,24 @@ def check_cart(driver):
     assert driver.title == "Carrello"
 
 
-def remove_product(driver, product_name):
+def remove_product(self, driver, product_name):
     check_cart(driver)
 
-    old_cart = CheckoutTestFunctions.get_cart_products(driver)
+    old_cart = CheckoutTestFunctions.get_cart_products(self, driver)
 
     product = driver.find_element(By.ID, product_name)
     remove_button = product.find_element(By.LINK_TEXT, "Rimuovi")
 
     remove_button.click()
 
-    new_cart = CheckoutTestFunctions.get_cart_products(driver)
+    new_cart = CheckoutTestFunctions.get_cart_products(self, driver)
     modified_old_cart = [product for product in old_cart if product.get("Nome") != product_name]
 
     assert modified_old_cart == new_cart
     assert driver.title == "Carrello"
 
 
-def change_quantity(driver, product_name, nuova_quantita):
+def change_quantity(self, driver, product_name, nuova_quantita):
     check_cart(driver)
 
     product = driver.find_element(By.ID, product_name)
@@ -91,5 +90,4 @@ def change_quantity(driver, product_name, nuova_quantita):
     assert prezzo_al_pezzo * float(nuova_quantita) == float(nuovo_prezzo)
     assert driver.title == "Carrello"
 
-    driver.get("http://127.0.0.1:8000/vetrina/")
-
+    driver.get(f"{self.live_server_url}/vetrina/")

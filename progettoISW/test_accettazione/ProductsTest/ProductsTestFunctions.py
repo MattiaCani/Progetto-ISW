@@ -1,4 +1,5 @@
 import time
+import pdb
 
 from selenium.webdriver.common.by import By
 
@@ -91,7 +92,7 @@ def insert_product_success(driver, prodotto):
     assert user_before == user_after
 
 
-def insert_product_failure(driver, prodotto):
+def insert_product_failure(self, driver, prodotto):
     user_before = driver.get_cookie("sessionid")
     old_products = get_products(driver)
 
@@ -102,7 +103,7 @@ def insert_product_failure(driver, prodotto):
 
     error_message = driver.find_element(By.CLASS_NAME, "errorlist")
 
-    driver.get("http://127.0.0.1:8000/vetrina_amministratore")
+    driver.get(f"{self.live_server_url}/vetrina_amministratore/")
     new_products = get_products(driver)
 
     assert error_message is not None
@@ -146,7 +147,7 @@ def modify_product_success(driver, prodotto, cambio_prezzo):
     assert user_before == user_after
 
 
-def modify_product_failure(driver, prodotto, cambio_prezzo):
+def modify_product_failure(self, driver, prodotto, cambio_prezzo):
     user_before = driver.get_cookie("sessionid")
     old_products = get_products(driver)
 
@@ -157,7 +158,7 @@ def modify_product_failure(driver, prodotto, cambio_prezzo):
 
     error_message = driver.find_element(By.CLASS_NAME, "errorlist")
 
-    driver.get("http://127.0.0.1:8000/vetrina_amministratore")
+    driver.get(f"{self.live_server_url}/vetrina_amministratore/")
     new_products = get_products(driver)
 
     assert old_products == new_products

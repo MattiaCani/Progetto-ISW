@@ -34,8 +34,7 @@ def reg_success(driver, user):
 
     time.sleep(2)
 
-    user_credential = "" + user.username, "" + user.password1
-    utility_test.login(driver, user_credential)
+    utility_test.login(driver, user.username, user.password1)
 
     title = driver.title
     logged_user = driver.find_element(By.ID, "logged_user")

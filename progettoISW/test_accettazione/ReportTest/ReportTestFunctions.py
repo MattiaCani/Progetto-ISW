@@ -5,8 +5,8 @@ from selenium.webdriver.common.by import By
 from test_accettazione.FilterTest import FilterTestFunctions
 
 
-def open_report(driver):
-    driver.get("http://127.0.0.1:8000/vetrina_amministratore")
+def open_report(self, driver):
+    driver.get(f"{self.live_server_url}/vetrina_amministratore/")
 
     report_button = driver.find_element(By.ID, "resoconto")
     report_button.click()

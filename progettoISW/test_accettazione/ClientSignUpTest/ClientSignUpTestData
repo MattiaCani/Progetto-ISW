@@ -1,5 +1,5 @@
-{"username": "Test", "password1": "prova9H1", "password2": "prova9H1", "email": "test@test.test", "first_name": "Test", "last_name": "Testone", "test": "reg_success"}
+{"username": "Test1", "password1": "prova9H1", "password2": "prova9H1", "email": "test@test.test", "first_name": "Test", "last_name": "Testone", "test": "reg_success"}
 {"username": "Nome", "password1": "prova9H1", "password2": "prova9H1", "email": "nome@nome", "first_name": "Nome", "last_name": "Cognome", "test": "reg_email_failure"}
-{"username": "Test", "password1": "prova9H1", "password2": "prova9H1", "email": "nome@nome.nome", "first_name": "Test", "last_name": "Testone", "test": "reg_username_failure"}
+{"username": "Test1", "password1": "prova9H1", "password2": "prova9H1", "email": "nome@nome.nome", "first_name": "Test", "last_name": "Testone", "test": "reg_username_failure"}
 {"username": "Nome", "password1": "prova9H1", "password2": "mario8J1", "email": "nome@nome.nome", "first_name": "Test", "last_name": "Testone", "test": "reg_different_passwords"}
 {"username": "Nome", "password1": "p", "password2": "p", "email": "nome@nome.nome", "first_name": "Test", "last_name": "Testone", "test": "reg_problem_password"}
